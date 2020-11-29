@@ -1,4 +1,5 @@
 import 'package:demo/page/article/page_article_search.dart';
+import 'package:demo/page/home/page_corp_list.dart';
 import 'package:demo/page/mine/ys_collect.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/page/yuesao/ys_detail.dart';
@@ -30,3 +31,6 @@ var yuyingListPageHandler = Handler(handlerFunc: (BuildContext context, Map<Stri
 
 /* 月嫂详情 */
 var ysDetailPageHandler = Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) => YsDetailPage());
+
+/* 加盟商列表 */
+var corpListPageHandler = Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) => PageCorpList());
