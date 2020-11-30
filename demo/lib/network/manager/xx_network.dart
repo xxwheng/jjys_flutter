@@ -29,8 +29,8 @@ class XXNetwork {
     params["citycode"] = "103212";
     params["_corp_id"] = "1";
     params["corp_id"] = "1";
-    params["user_id"] = 190;
-    params["token"] = "b61384f49892846fa45219d28677e236";
+    // params["user_id"] = 190;
+    // params["token"] = "b61384f49892846fa45219d28677e236";
 
     Completer completer = Completer();
 

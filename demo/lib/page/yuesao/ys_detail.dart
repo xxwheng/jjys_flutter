@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/model/ys_detail_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/slice/ys_chart.dart';
 import 'package:demo/slice/ys_name_auth.dart';
 import 'package:demo/utils/ys_level.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +75,8 @@ class _YsDetailPageState extends State<YsDetailPage> {
                                 )),
                         Container(
                           padding: EdgeInsets.only(left: AdaptUI.rpx(10)),
-                          child: Text("${_ysBean?.profile?.commentScore ?? 0}分"),
+                          child:
+                              Text("${_ysBean?.profile?.commentScore ?? 0}分"),
                         )
                       ],
                     ),
@@ -118,56 +120,283 @@ class _YsDetailPageState extends State<YsDetailPage> {
               ),
             ),
             Container(
+              color: Colors.white,
               padding: EdgeInsets.only(
                   left: AdaptUI.rpx(30),
                   bottom: AdaptUI.rpx(30),
                   top: AdaptUI.rpx(30)),
-              child: Wrap(
-                  spacing: AdaptUI.rpx(20),
-                  runSpacing: AdaptUI.rpx(20),
-                  children: [
-                    ..._ysBean?.credit?.certificate
-                        ?.map(
-                          (e) => Container(
-                            padding: EdgeInsets.only(
-                                left: AdaptUI.rpx(30),
-                                top: AdaptUI.rpx(10),
-                                bottom: AdaptUI.rpx(10),
-                                right: AdaptUI.rpx(30)),
-                            decoration: BoxDecoration(
-                                color: UIColor.mainColor,
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(AdaptUI.rpx(30)))),
-                            child: Text(
-                              e.title,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: AdaptUI.rpx(26)),
-                            ),
-                          ),
-                        )
-                        ?.toList() ?? [],
-                  ]),
-            ),
-            Container(
-              padding: EdgeInsets.only(left: AdaptUI.rpx(30), right: AdaptUI.rpx(30)),
-              child: Text(_ysBean?.profile?.introduce ?? "", style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(28)),),
-            ),
-            Container(
-              padding: EdgeInsets.only(top: AdaptUI.rpx(30), left: AdaptUI.rpx(30)),
-              child: Wrap(
-                children: _ysBean?.profile?.label?.map((e) => Container(
-                  padding: EdgeInsets.only(left: AdaptUI.rpx(15), right: AdaptUI.rpx(15), top: AdaptUI.rpx(5), bottom: AdaptUI.rpx(5)),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: UIColor.hex999),
-                    borderRadius: BorderRadius.all(Radius.circular(20))
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: AdaptUI.rpx(20),
+                    runSpacing: AdaptUI.rpx(20),
+                    children: [
+                      ..._ysBean?.credit?.certificate
+                              ?.map(
+                                (e) => Container(
+                                  padding: EdgeInsets.only(
+                                      left: AdaptUI.rpx(30),
+                                      top: AdaptUI.rpx(10),
+                                      bottom: AdaptUI.rpx(10),
+                                      right: AdaptUI.rpx(30)),
+                                  decoration: BoxDecoration(
+                                      color: UIColor.mainColor,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(AdaptUI.rpx(30)))),
+                                  child: Text(
+                                    e.title,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: AdaptUI.rpx(26)),
+                                  ),
+                                ),
+                              )
+                              ?.toList() ??
+                          [],
+                    ],
                   ),
-                  child: Text(e, style: TextStyle(color: UIColor.mainColor),),
-                ) )?.toList() ?? [],
+                  Container(
+                    height: AdaptUI.rpx(30),
+                  ),
+                  Text(
+                    _ysBean?.profile?.introduce ?? "",
+                    style: TextStyle(
+                        color: UIColor.hex666, fontSize: AdaptUI.rpx(28)),
+                  ),
+                  Container(
+                    height: AdaptUI.rpx(30),
+                  ),
+                  Wrap(
+                    children: _ysBean?.profile?.label
+                            ?.map((e) => Container(
+                                  padding: EdgeInsets.only(
+                                      left: AdaptUI.rpx(15),
+                                      right: AdaptUI.rpx(15),
+                                      top: AdaptUI.rpx(5),
+                                      bottom: AdaptUI.rpx(5)),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(color: UIColor.hex999),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Text(
+                                    e,
+                                    style: TextStyle(color: UIColor.mainColor),
+                                  ),
+                                ))
+                            ?.toList() ??
+                        [],
+                  ),
+                  _ysBean == null
+                      ? Offstage()
+                      : YsChartWidget(
+                          values: _ysBean.credit.charts
+                              .map((e) => int.parse(e) / 100.0)
+                              .toList(),
+                        )
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
+              padding: EdgeInsets.all(AdaptUI.rpx(30)),
+              height: AdaptUI.rpx(360),
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "工作排期",
+                          style: TextStyle(
+                              fontSize: AdaptUI.rpx(32), color: UIColor.hex333),
+                        ),
+                      ),
+                      Text(
+                        "最近一年",
+                        style: TextStyle(
+                            fontSize: AdaptUI.rpx(30), color: UIColor.hex666),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: AdaptUI.rpx(30),
+                        color: UIColor.hex999,
+                      )
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(
+                        top: AdaptUI.rpx(10), bottom: AdaptUI.rpx(10)),
+                    height: AdaptUI.rpx(180),
+                    child: PageView(
+                      controller: PageController(),
+                      children: [
+                        Container(
+                          color: Colors.blue,
+                          child: Center(
+                            child: Text("blur"),
+                          ),
+                        ),
+                        Container(
+                          color: Colors.green,
+                          child: Center(
+                            child: Text("blur"),
+                          ),
+                        ),
+                        Container(
+                          color: Colors.red,
+                          child: Center(
+                            child: Text("blur"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: AdaptUI.rpx(20),
+                        height: AdaptUI.rpx(20),
+                        color: UIColor.hex999,
+                        margin: EdgeInsets.only(right: AdaptUI.rpx(10)),
+                      ),
+                      Text("可预约"),
+                      Container(
+                        width: AdaptUI.rpx(20),
+                        height: AdaptUI.rpx(20),
+                        color: Color(0xffc398e3),
+                        margin: EdgeInsets.only(
+                            left: AdaptUI.rpx(60), right: AdaptUI.rpx(10)),
+                      ),
+                      Text("已占用")
+                    ],
+                  )
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
+              padding: EdgeInsets.all(AdaptUI.rpx(30)),
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "服务内容",
+                          style: TextStyle(
+                              fontSize: AdaptUI.rpx(32), color: UIColor.hex333),
+                        ),
+                      ),
+                      Text(
+                        "查看更多",
+                        style: TextStyle(
+                            fontSize: AdaptUI.rpx(30), color: UIColor.hex666),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: AdaptUI.rpx(30),
+                        color: UIColor.hex999,
+                      )
+                    ],
+                  ),
+                  Container(
+                    height: AdaptUI.rpx(20),
+                  ),
+                  Wrap(
+                    spacing: AdaptUI.rpx(14),
+                    runSpacing: AdaptUI.rpx(20),
+                    children: ["基本护理", "科学喂养", "宝宝早教", "产后恢复", "月子餐", "母婴护理"]
+                        .map((e) {
+                      return Container(
+                        width: AdaptUI.rpx(220),
+                        height: AdaptUI.rpx(240),
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(bottom: AdaptUI.rpx(10)),
+                              width: AdaptUI.rpx(220),
+                              height: AdaptUI.rpx(180),
+                              color: Colors.red,
+                            ),
+                            Text(
+                              e,
+                              style: TextStyle(
+                                  fontSize: AdaptUI.rpx(30),
+                                  color: UIColor.hex666),
+                            )
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
+              padding: EdgeInsets.all(AdaptUI.rpx(30)),
+              color: Colors.white,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text("用户评价(10)", style: TextStyle(fontSize: AdaptUI.rpx(30)),)),
+                      heartLineWidget("综合评分", 5, MainAxisAlignment.end)
+                    ],
+                  ),
+                  Container(height: AdaptUI.rpx(30),),
+                  Wrap(
+                    spacing: AdaptUI.rpx(30),
+                    runSpacing: AdaptUI.rpx(20),
+                    children: ["宝宝护理", "宝宝早教", "膳食搭配", "科学素养", "产妇护理", "沟通技巧"]
+                        .map((e) => heartLineWidget(e, 5))
+                        .toList(),
+                  )
+                ],
               ),
             )
           ],
         ),
+      ),
+    );
+  }
+
+  /* 评分widget title+heart+score */
+  Widget heartLineWidget(String title, int score, [MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start]) {
+    return
+      Container(
+      width: AdaptUI.rpx(330),
+      child:
+      Row(
+        mainAxisAlignment: mainAxisAlignment,
+        children: [
+          Container(
+            margin: EdgeInsets.only(right: AdaptUI.rpx(10)),
+            child: Text(title),
+          ),
+          Row(
+            children: List.generate(
+                score,
+                (index) => Container(
+                  margin: EdgeInsets.only(left:AdaptUI.rpx(5)),
+                  child: Image.asset(
+                    "images/ys_heart.png",
+                    width: AdaptUI.rpx(20),
+                    height: AdaptUI.rpx(20),
+                  ),
+                ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: AdaptUI.rpx(10)),
+            child: Text("$score分"),
+          )
+
+        ],
       ),
     );
   }

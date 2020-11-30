@@ -31,6 +31,9 @@ class PageRoutes {
   /* 月嫂详情 */
   static String ysDetailPage = "/page/yuesao/ys_detail";
 
+  /* 加盟商选择列表 */
+  static String corpListPage = "/page/home/page_corp_list";
+
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);
     router.define(searchArticle, handler: searchArticleHandler);
@@ -38,5 +41,6 @@ class PageRoutes {
     router.define(ysListPage, handler: ysListPageHandler);
     router.define(ysDetailPage, handler: ysDetailPageHandler);
     router.define(yyListPage, handler: yuyingListPageHandler);
+    router.define(corpListPage, handler: corpListPageHandler);
   }
 }

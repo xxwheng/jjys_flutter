@@ -7,7 +7,6 @@ import 'package:demo/page/root/app.dart';
 
 
 void main() {
-
   FluroRouter router = FluroRouter();
   PageRoutes.configFluroRoutes(router);
   App.router = router;

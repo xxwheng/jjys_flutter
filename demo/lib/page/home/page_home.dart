@@ -47,6 +47,11 @@ class _PageHomeState extends State<PageHome> {
     loadArticleList();
   }
 
+  // 加盟商切换
+  void corpChooseDidTap() {
+    App.navigationTo(context, PageRoutes.corpListPage);
+  }
+
   /// banner点击
   void bannerItemDidTap(index) {
     var item = homeData.banner[index];
@@ -66,6 +71,7 @@ class _PageHomeState extends State<PageHome> {
     }
   }
 
+  // 加载文章列表
   void loadArticleList() async {
     XXNetwork.shared.post(params: {
       "methodName":"ArticleList","size":5,
@@ -155,8 +161,22 @@ class _PageHomeState extends State<PageHome> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Center(child: Text("家家月嫂"),),
+          title: Text("家家月嫂"),
+          centerTitle: true,
           elevation: 0,
+          leadingWidth: AdaptUI.rpx(150),
+          leading: GestureDetector(
+            onTap: this.corpChooseDidTap,
+            child: Container(
+              padding: EdgeInsets.only(left: AdaptUI.rpx(20)),
+              child: Row(
+                children: [
+                  Icon(Icons.keyboard_arrow_down,size: 20,),
+                  Text("深圳")
+                ],
+              ),
+            ),
+          ),
         ),
         backgroundColor: UIColor.pageColor,
         body: ListView(

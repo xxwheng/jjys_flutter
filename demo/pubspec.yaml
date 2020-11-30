@@ -48,6 +48,7 @@ dependencies:
   # UI 布局尺寸
   adaptui:
     git: https://github.com/xxwheng/adaptui.git
+  logger: ^0.9.4
 
 dev_dependencies:
   flutter_test:
