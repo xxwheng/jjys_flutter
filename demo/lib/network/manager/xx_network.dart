@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:math';
 
+import 'package:demo/data/corp_data.dart';
+import 'package:demo/model/corp_grop_bean.dart';
 import 'package:demo/network/dio/http_config.dart';
 import 'package:demo/network/dio/http_error.dart';
 import 'package:demo/network/dio/http_util.dart';
@@ -14,21 +16,25 @@ import 'package:demo/network/dio/http_util.dart';
 /// 返回Completer.future
 class XXNetwork {
 
-
   factory XXNetwork() => shared;
 
   static final XXNetwork shared = XXNetwork._internal();
 
-  XXNetwork._internal();
+  CorpData _corpData;
+
+  XXNetwork._internal() {
+    _corpData = CorpData();
+  }
 
   Future post({String path, Map<String, dynamic> params, String tag}) async {
     path ??= HttpConfig.path;
     params ??= Map<String, dynamic>();
     params["version"] = HttpConfig.version;
     params["platform"] = HttpConfig.getPlatform();
-    params["citycode"] = "103212";
-    params["_corp_id"] = "1";
-    params["corp_id"] = "1";
+    CorpCityBean cacheBean = await _corpData.getCorpDataFromCache();
+    params["citycode"] = cacheBean.cityCode;
+    params["_corp_id"] = cacheBean.id;
+    params["corp_id"] = cacheBean.id;
     // params["user_id"] = 190;
     // params["token"] = "b61384f49892846fa45219d28677e236";
 

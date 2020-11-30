@@ -6,6 +6,7 @@ import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/template/a_dart/a_expansion_tile.dart';
 import 'package:flutter/material.dart';
 
+/* 加盟商列表 */
 class PageCorpList extends StatefulWidget {
   @override
   _PageCorpListState createState() => _PageCorpListState();

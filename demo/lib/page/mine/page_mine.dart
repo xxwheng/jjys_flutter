@@ -1,6 +1,7 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/data/user_data.dart';
 import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
@@ -33,6 +34,13 @@ class _PageMineState extends State<PageMine> {
 
   /// 点击
   void itemDidTapIndex(int index) {
+    bool isLogin = UserData().isLogin;
+    if (!isLogin) {
+      App.navigationTo(context, PageRoutes.loginPage);
+      return;
+    }
+
+
     switch (index) {
       case 1:
         App.navigationTo(context, PageRoutes.myCollect);

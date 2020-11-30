@@ -30,4 +30,15 @@ class CorpCityBean {
         json["city"].toString(), json["title_jiajia"].toString(),
         json["citycode"].toString(), json["sort_by"].toString());
   }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': this.id,
+      'title': this.title,
+      'city': this.city,
+      'title_jiajia': this.titleJiaJia,
+      'citycode': this.cityCode,
+      'sort_by': this.sortBy,
+    };
+  }
 }
