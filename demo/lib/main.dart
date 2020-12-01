@@ -1,4 +1,5 @@
 import 'package:demo/common/color.dart';
+import 'package:demo/page/mine/login_page.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
         // appBar: AppBar(
         //   title: Text('Material App Bar'),
         // ),
-        body: TabBarController(),
+        body: LoginPage()//TabBarController(),
       ),
     );
   }

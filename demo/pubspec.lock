@@ -730,6 +730,20 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.0"
+  webview_flutter:
+    dependency: "direct main"
+    description:
+      name: webview_flutter
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.7"
+  webview_flutter_plus:
+    dependency: "direct main"
+    description:
+      name: webview_flutter_plus
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.1+10"
   win32:
     dependency: transitive
     description:
