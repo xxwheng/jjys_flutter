@@ -1,4 +1,5 @@
 import 'package:adaptui/adaptui.dart';
+import 'package:demo/common/color.dart';
 import 'package:demo/components/tcaptcha/tc_bean.dart';
 import 'package:demo/components/tcaptcha/tc_html.dart';
 import 'package:flutter/material.dart';
@@ -53,51 +54,65 @@ class _TCaptchaWebWidgetState extends State<TCaptchaWebWidget> {
 
     return Offstage(
       offstage: widget.hideStage,
-      child: Center(
-        child: Container(
-          width: sizeView?.width ?? AdaptUI.screenWidth*5/6,
-          height: sizeView?.height ??
-              AdaptUI.screenHeight - AdaptUI.safeATop - AdaptUI.safeABot,
-          child: WebViewPlus(
-            javascriptMode: JavascriptMode.unrestricted,
-            onWebViewCreated: (WebViewPlusController controller) {
-              this.controller = controller;
-              controller.loadString(_tc.htmlString);
-            },
-            javascriptChannels: [
-              JavascriptChannel(
-                name: "loadAction",
-                onMessageReceived: (JavascriptMessage message) {
-                  print(message);
-                  TCSDKView sdkView = TCSDKView.fromMessage(message.message);
-                  print("width: ${sdkView.width} height: ${sdkView.height}");
+      child: Stack(
+        children: [
+          Opacity(opacity: 0.1,child:
+            Container(
+              color: Colors.black,
+            )
+            ,),
+          Align(
+            alignment: Alignment(0, -0.3),
+            child: Container(
+              width: AdaptUI.rpx(470),
+              height: AdaptUI.rpx(470),
+              child: WebViewPlus(
+                javascriptMode: JavascriptMode.unrestricted,
+                onWebViewCreated: (WebViewPlusController controller) {
+                  this.controller = controller;
+                  controller.loadString(_tc.htmlString);
                 },
+                javascriptChannels: [
+                  JavascriptChannel(
+                    name: "loadAction",
+                    onMessageReceived: (JavascriptMessage message) {
+                      print(message);
+                      TCSDKView sdkView = TCSDKView.fromMessage(message.message);
+
+                      print("width: ${sdkView.width} height: ${sdkView.height}");
+
+                      setState(() {
+                        this.sizeView = sdkView;
+                      });
+                    },
+                  ),
+                  JavascriptChannel(
+                    name: "verifiedAction",
+                    onMessageReceived: (JavascriptMessage message) {
+                      print(message);
+                      TCVerifyBean bean = TCVerifyBean.fromMessage(message.message);
+                      if (bean.ret == 0) {// 成功
+                        widget.successCallback(bean.ticket, bean.randstr);
+                        widget.dismissCallback();
+                      } else if (bean.ret == 2) {// 关闭
+                        widget.dismissCallback();
+                      }
+                    },
+                  ),
+                  JavascriptChannel(
+                    name: "errorAction",
+                    onMessageReceived: (JavascriptMessage message) {
+                      print(message);
+                      widget.errorCallback();
+                      widget.dismissCallback();
+                    },
+                  ),
+                  //加载失败
+                ].toSet(),
               ),
-              JavascriptChannel(
-                name: "verifiedAction",
-                onMessageReceived: (JavascriptMessage message) {
-                  print(message);
-                  TCVerifyBean bean = TCVerifyBean.fromMessage(message.message);
-                  if (bean.ret == 0) {// 成功
-                    widget.successCallback(bean.ticket, bean.randstr);
-                    widget.dismissCallback();
-                  } else if (bean.ret == 2) {// 关闭
-                    widget.dismissCallback();
-                  }
-                },
-              ),
-              JavascriptChannel(
-                name: "errorAction",
-                onMessageReceived: (JavascriptMessage message) {
-                  print(message);
-                  widget.errorCallback();
-                  widget.dismissCallback();
-                },
-              ),
-              //加载失败
-            ].toSet(),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

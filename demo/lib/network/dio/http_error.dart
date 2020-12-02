@@ -30,6 +30,10 @@ class HttpError {
 
   static const UNKNOWN = "UNKNOWN";
 
+  /* 返回数据异常 */
+  static const DATA_ERROR = "DATA_ERROR";
+
+
   String code;
   String message;
 

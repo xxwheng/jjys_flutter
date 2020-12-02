@@ -1,3 +1,7 @@
+import 'package:demo/common/common.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+
 class TCaptchaHtmlString {
   String random;
 
@@ -13,7 +17,10 @@ class TCaptchaHtmlString {
   }
 
   void resetRandom() {
-    this.random = "6c54af43";
+    var seconds = DateTime.now().millisecondsSinceEpoch.toString();
+    var str = seconds.substring(seconds.length-8);
+    var randomStr = md5.convert(utf8.encode(str)).toString().substring(6, 14);
+    this.random = randomStr;
   }
 
   String _getHtmlStr() {
@@ -34,7 +41,7 @@ class TCaptchaHtmlString {
             }
         };
 
-        // 验证码加载完成的回调，用来设置webview尺寸
+        /// 验证码加载完成的回调，用来设置webview尺寸
         window.SDKTCaptchaReadyCallback = function (retJson) {
             if (retJson && retJson.sdkView && retJson.sdkView.width && retJson.sdkView.height &&  parseInt(retJson.sdkView.width) >0 && parseInt(retJson.sdkView.height) >0 ){
                 loadAction.postMessage(JSON.stringify(retJson))

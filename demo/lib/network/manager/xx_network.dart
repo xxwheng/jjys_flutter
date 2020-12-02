@@ -46,7 +46,7 @@ class XXNetwork {
       if (res["code"] == 0) {
         completer.complete(res["data"]);
       } else {
-
+        completer.completeError(HttpError(HttpError.DATA_ERROR, "操作失败"));
       }
     }, reject: (HttpError error) {
       completer.completeError(error);

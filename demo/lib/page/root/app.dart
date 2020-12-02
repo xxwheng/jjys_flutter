@@ -37,6 +37,9 @@ class PageRoutes {
   /* 登录页 */
   static String loginPage = "/page/mine/login_page";
 
+  /* 单一网页嵌套 */
+  static String singleWebPage = "/components/web/single_web";
+
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);
     router.define(searchArticle, handler: searchArticleHandler);
@@ -46,5 +49,6 @@ class PageRoutes {
     router.define(yyListPage, handler: yuyingListPageHandler);
     router.define(corpListPage, handler: corpListPageHandler);
     router.define(loginPage, handler: loginPageHandler);
+    router.define(singleWebPage, handler: singleWebPageHandler);
   }
 }
