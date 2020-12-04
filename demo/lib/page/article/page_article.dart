@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
+import 'package:demo/data/corp_data.dart';
 import 'package:demo/main.dart';
 import 'package:demo/model/article_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
@@ -11,6 +12,7 @@ import 'package:demo/slice/article_search.dart';
 import 'package:demo/template/article/article_tabbarview.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// 文章-tab
 class PageArticle extends StatefulWidget {
@@ -54,9 +56,10 @@ class _PageArticleState extends State<PageArticle>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Center(
-            child: Text("家家月嫂"),
+          title: Consumer<CorpData>(
+              builder: (context, corp, _) => Text(corp.corpBean.titleJiaJia)
           ),
+          centerTitle: true,
           elevation: 0,
         ),
         body: Container(

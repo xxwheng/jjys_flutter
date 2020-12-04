@@ -1,4 +1,6 @@
+import 'package:demo/common/common.dart';
 import 'package:demo/components/web/single_web.dart';
+import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/article/page_article_search.dart';
 import 'package:demo/page/home/page_corp_list.dart';
 import 'package:demo/page/mine/login_page.dart';
@@ -51,10 +53,10 @@ var loginPageHandler = Handler(
         LoginPage());
 
 /* 单一网页 */
-var singleWebPageHandler = Handler(
-    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-      String title = params["title"]?.toString();
-      String url = params["url"]?.toString();
-      return SingleWebPage(title: title, url: url);
-    }
-        );
+var singleWebPageHandler =
+    Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  logger.i(params);
+  String title = params["title"]?.first?.toString();
+  String url = params["url"]?.first?.toString();
+  return SingleWebPage(title: title, url: url);
+});

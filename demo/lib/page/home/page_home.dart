@@ -1,6 +1,8 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
+import 'package:demo/data/corp_data.dart';
 import 'package:demo/model/article_bean.dart';
 import 'package:demo/model/home_bean.dart';
 import 'package:demo/model/ys_item_bean.dart';
@@ -10,11 +12,14 @@ import 'package:demo/slice/article_widget.dart';
 import 'package:demo/slice/home_comment.dart';
 import 'package:demo/slice/home_learn_more.dart';
 import 'package:demo/slice/home_ys_top.dart';
+import 'package:demo/template/home/home_refresh_page.dart';
 import 'package:demo/template/home/menu_scroll.dart';
 import 'package:demo/utils/ys_level.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../common/color.dart';
 import '../../model/home_bean.dart';
@@ -29,7 +34,6 @@ class PageHome extends StatefulWidget {
 }
 
 class _PageHomeState extends State<PageHome> {
-
   /// 首页数据
   HomeBean homeData;
 
@@ -39,12 +43,15 @@ class _PageHomeState extends State<PageHome> {
   /// 处理flutter_swiper组件 loop为true时 初始化滑动很多次问题
   bool _bannerLoop = false;
 
+  /* 刷新controller */
+  RefreshController _controller;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadHomeData();
-    loadArticleList();
+    _controller = RefreshController();
+    refreshHomePageData();
   }
 
   // 加盟商切换
@@ -71,12 +78,24 @@ class _PageHomeState extends State<PageHome> {
     }
   }
 
+  /* 更新首页数据 */
+  void refreshHomePageData() {
+    logger.i("更新数据");
+    loadHomeData();
+    loadArticleList();
+  }
+
   // 加载文章列表
   void loadArticleList() async {
     XXNetwork.shared.post(params: {
-      "methodName":"ArticleList","size":5,
+      "methodName": "ArticleList",
+      "size": 5,
     }).then((res) {
-      var articleList = (res["data"] as List)?.map((e) => e == null ? null : ArticleBean.fromJson(e as Map<String, dynamic>))?.toList();
+      var articleList = (res["data"] as List)
+          ?.map((e) => e == null
+              ? null
+              : ArticleBean.fromJson(e as Map<String, dynamic>))
+          ?.toList();
       setState(() {
         this.articleList = articleList;
       });
@@ -91,10 +110,10 @@ class _PageHomeState extends State<PageHome> {
           "methodName": "YuesaoHome",
         })
         .then((res) {
-
           var list = (res['comment'] as List)
-              ?.map((e) =>
-          e == null ? null : CommentBean.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => e == null
+                  ? null
+                  : CommentBean.fromJson(e as Map<String, dynamic>))
               ?.toList();
           print(list.first.content);
 
@@ -114,8 +133,10 @@ class _PageHomeState extends State<PageHome> {
           });
           // 月嫂之星头像没有域名
           homeData.yuesaoTopList.forEach((e) {
-            if (e.info_yuesao.headPhoto.isNotEmpty && !e.info_yuesao.headPhoto.contains("http")) {
-              e.info_yuesao.headPhoto = HttpConfig.webUrl + e.info_yuesao.headPhoto;
+            if (e.info_yuesao.headPhoto.isNotEmpty &&
+                !e.info_yuesao.headPhoto.contains("http")) {
+              e.info_yuesao.headPhoto =
+                  HttpConfig.webUrl + e.info_yuesao.headPhoto;
             }
           });
           print("更新数据");
@@ -125,35 +146,39 @@ class _PageHomeState extends State<PageHome> {
           });
         })
         .catchError((err) {})
-        .whenComplete(() {});
+        .whenComplete(() {
+          if (this._controller.isRefresh) {
+            this._controller.refreshCompleted();
+          }
+    });
   }
 
   /// 菜单导航按钮
   Widget menuItemWidgetBuiler(context, index) {
     HomeMenuBean item = homeData.menuList[index];
     return GestureDetector(
-        onTapUp: (tap) {
-          menuItemDidTap(item);
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: AdaptUI.rpx(80),
-              height: AdaptUI.rpx(80),
-              child: CachedNetworkImage(
-                imageUrl: item.thumb,
-                fit: BoxFit.fitWidth,
-              ),
+      onTapUp: (tap) {
+        menuItemDidTap(item);
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: AdaptUI.rpx(80),
+            height: AdaptUI.rpx(80),
+            child: CachedNetworkImage(
+              imageUrl: item.thumb,
+              fit: BoxFit.fitWidth,
             ),
-            Container(
-              padding: EdgeInsets.only(top: AdaptUI.rpx(10)),
-              child: Center(
-                child: Text(item.title),
-              ),
-            )
-          ],
-        ),
+          ),
+          Container(
+            padding: EdgeInsets.only(top: AdaptUI.rpx(10)),
+            child: Center(
+              child: Text(item.title),
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -161,7 +186,9 @@ class _PageHomeState extends State<PageHome> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("家家月嫂"),
+          title: Consumer<CorpData>(
+            builder: (context, corp, _) => Text(corp.corpBean.titleJiaJia)
+          ),
           centerTitle: true,
           elevation: 0,
           leadingWidth: AdaptUI.rpx(150),
@@ -171,15 +198,24 @@ class _PageHomeState extends State<PageHome> {
               padding: EdgeInsets.only(left: AdaptUI.rpx(20)),
               child: Row(
                 children: [
-                  Icon(Icons.keyboard_arrow_down,size: 20,),
-                  Text("深圳")
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 20,
+                  ),
+                  Consumer<CorpData>(
+                    builder: (context, corp, _) =>
+                        Text(corp.corpBean.city)
+                  )
                 ],
               ),
             ),
           ),
         ),
         backgroundColor: UIColor.pageColor,
-        body: ListView(
+        body: HomeRefreshPage(
+          controller: _controller,
+          onRefresh: this.refreshHomePageData,
+          child: ListView(
           children: [
             Container(
               height: AdaptUI.rpx(280),
@@ -232,110 +268,126 @@ class _PageHomeState extends State<PageHome> {
                     [],
               ),
             ),
-            homeData?.yuesaoTopList == null || homeData.yuesaoTopList.length == 0 ? Offstage() : Container(
-                margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    HomeLearnMoreHeaderWidget(
-                      title: "月嫂之星",
-                      margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
-                    ),
-                    Container(
-                      height: AdaptUI.rpx(470),
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: homeData?.yuesaoTopList?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          HomeTopYuesaoBean item =
-                              homeData.yuesaoTopList[index];
-                          return HomeYuesaoTopWidget(
-                            margin: EdgeInsets.only(
-                                left: index == 0 ? AdaptUI.rpx(30) : 0,
-                                top: AdaptUI.rpx(20), bottom: AdaptUI.rpx(40), right: AdaptUI.rpx(20)),
-                            imageUrl: item.info_yuesao.headPhoto,
-                            name: item.info_yuesao.provinceName + "·" + item.info_yuesao.nickname,
-                            levelStr: YsLevel.getYuesaoLevel(item.info_yuesao.level),
-                          );
-                        },
-                      ),
-                    )
-                  ],
-                )),
-            homeData?.commentList == null || homeData.commentList.length == 0 ? Offstage() : Container(
-              margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
-              color: Colors.white,
-              child: Column(
-                children: [
-                  HomeLearnMoreHeaderWidget(
-                    title: "美妈点评",
+            homeData?.yuesaoTopList == null ||
+                    homeData.yuesaoTopList.length == 0
+                ? Offstage()
+                : Container(
                     margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(AdaptUI.rpx(30), AdaptUI.rpx(20), AdaptUI.rpx(30), AdaptUI.rpx(30)),
-                    height: AdaptUI.rpx(500),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: UIColor.hexEEE, width: 0.5),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                            offset: Offset(0, 1),
-                            blurRadius: 2,
-                            spreadRadius: 1,
-                            color: Color.fromRGBO(221, 221, 221, 0.4))
+                    color: Colors.white,
+                    child: Column(
+                      children: [
+                        HomeLearnMoreHeaderWidget(
+                          title: "月嫂之星",
+                          margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                        ),
+                        Container(
+                          height: AdaptUI.rpx(470),
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: homeData?.yuesaoTopList?.length ?? 0,
+                            itemBuilder: (context, index) {
+                              HomeTopYuesaoBean item =
+                                  homeData.yuesaoTopList[index];
+                              return HomeYuesaoTopWidget(
+                                margin: EdgeInsets.only(
+                                    left: index == 0 ? AdaptUI.rpx(30) : 0,
+                                    top: AdaptUI.rpx(20),
+                                    bottom: AdaptUI.rpx(40),
+                                    right: AdaptUI.rpx(20)),
+                                imageUrl: item.info_yuesao.headPhoto,
+                                name: item.info_yuesao.provinceName +
+                                    "·" +
+                                    item.info_yuesao.nickname,
+                                levelStr: YsLevel.getYuesaoLevel(
+                                    item.info_yuesao.level),
+                              );
+                            },
+                          ),
+                        )
+                      ],
+                    )),
+            homeData?.commentList == null || homeData.commentList.length == 0
+                ? Offstage()
+                : Container(
+                    margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                    color: Colors.white,
+                    child: Column(
+                      children: [
+                        HomeLearnMoreHeaderWidget(
+                          title: "美妈点评",
+                          margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                        ),
+                        Container(
+                          margin: EdgeInsets.fromLTRB(
+                              AdaptUI.rpx(30),
+                              AdaptUI.rpx(20),
+                              AdaptUI.rpx(30),
+                              AdaptUI.rpx(30)),
+                          height: AdaptUI.rpx(500),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border:
+                                Border.all(color: UIColor.hexEEE, width: 0.5),
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                  spreadRadius: 1,
+                                  color: Color.fromRGBO(221, 221, 221, 0.4))
+                            ],
+                          ),
+                          child: Swiper(
+                            loop: _bannerLoop,
+                            autoplay: true,
+                            itemCount: homeData?.commentList?.length ?? 0,
+                            pagination: SwiperPagination(
+                                builder: DotSwiperPaginationBuilder(
+                                    size: 6,
+                                    activeSize: 6,
+                                    activeColor: UIColor.mainColor,
+                                    color: Color.fromRGBO(0, 0, 0, 0.2))),
+                            itemBuilder: (context, index) {
+                              var item = homeData.commentList[index];
+                              return HomeCommentWidget(
+                                headPhoto: item.headPhoto,
+                                username: item.username,
+                                score: int.parse(item.score.toString()),
+                                createTime: item.createAt.toString(),
+                                serverDays: item.productDays,
+                                content: item.content,
+                                picList: item.image,
+                              );
+                            },
+                            onTap: bannerItemDidTap,
+                          ),
+                        )
+                      ],
+                    )),
+            articleList == null || articleList.length == 0
+                ? Offstage()
+                : Container(
+                    color: Colors.white,
+                    margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                    padding: EdgeInsets.only(bottom: AdaptUI.rpx(40)),
+                    child: Column(
+                      children: [
+                        HomeLearnMoreHeaderWidget(
+                          title: "孕育知识",
+                          margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                        ),
+                        ...articleList.map((e) {
+                          return ArticleWidget(
+                            imageUrl: e.image,
+                            title: e.title,
+                            desc: e.desc,
+                          );
+                        }).toList()
                       ],
                     ),
-                    child: Swiper(
-                      loop: _bannerLoop,
-                      autoplay: true,
-                      itemCount: homeData?.commentList?.length ?? 0,
-                      pagination: SwiperPagination(
-                          builder: DotSwiperPaginationBuilder(
-                              size: 6,
-                              activeSize: 6,
-                              activeColor: UIColor.mainColor,
-                              color: Color.fromRGBO(0, 0, 0, 0.2)
-                          )),
-                      itemBuilder: (context, index) {
-                        var item = homeData.commentList[index];
-                        return HomeCommentWidget(
-                          headPhoto: item.headPhoto,
-                          username: item.username,
-                          score: int.parse(item.score.toString()),
-                          createTime: item.createAt.toString(),
-                          serverDays: item.productDays,
-                          content: item.content,
-                          picList: item.image,
-                        );
-                      },
-                      onTap: bannerItemDidTap,
-                    ),
                   )
-                ],
-              )
-            ),
-            articleList == null || articleList.length == 0 ? Offstage() : Container(
-              color: Colors.white,
-              margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
-              padding: EdgeInsets.only(bottom: AdaptUI.rpx(40)),
-              child: Column(
-                children: [
-                  HomeLearnMoreHeaderWidget(
-                    title: "孕育知识",
-                    margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
-                  ),
-                  ...articleList.map((e) {
-                    return ArticleWidget(
-                      imageUrl: e.image,
-                      title: e.title,
-                      desc: e.desc,
-                    );
-                  }).toList()
-                ],
-              ),
-            )
           ],
-        ));
+        )),
+    );
   }
 }

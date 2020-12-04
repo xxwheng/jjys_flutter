@@ -1,11 +1,13 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/user_data.dart';
 import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// 我的-tab
 class PageMine extends StatefulWidget {
@@ -32,14 +34,20 @@ class _PageMineState extends State<PageMine> {
     loadUserInfo();
   }
 
-  /// 点击
-  void itemDidTapIndex(int index) {
-    bool isLogin = UserData().isLogin;
-    if (!isLogin) {
+  /* 点击头像 */
+  void headerIconDidTap() {
+    if (!UserData.isLogin) {
       App.navigationTo(context, PageRoutes.loginPage);
       return;
     }
+  }
 
+  /// 点击
+  void itemDidTapIndex(int index) {
+    if (!UserData.isLogin) {
+      App.navigationTo(context, PageRoutes.loginPage);
+      return;
+    }
 
     switch (index) {
       case 1:
@@ -48,12 +56,9 @@ class _PageMineState extends State<PageMine> {
     }
   }
 
-
   /// 个人信息
   void loadUserInfo() async {
-    XXNetwork.shared.post(params: {
-      "methodName":"UserInfo"
-    }).then((value) {
+    XXNetwork.shared.post(params: {"methodName": "UserInfo"}).then((value) {
       UserInfoBean user = UserInfoBean.fromJson(value);
       setState(() {
         this.user = user;
@@ -65,7 +70,9 @@ class _PageMineState extends State<PageMine> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("家家月嫂")),
+        title: Consumer<CorpData>(
+            builder: (context, corp, _) => Text(corp.corpBean.titleJiaJia)),
+        centerTitle: true,
         elevation: 0,
       ),
       body: Container(
@@ -76,25 +83,45 @@ class _PageMineState extends State<PageMine> {
               color: UIColor.mainColor,
               padding: EdgeInsets.only(
                   top: AdaptUI.rpx(60), bottom: AdaptUI.rpx(50)),
-              child: Column(
+              child: GestureDetector(
+                onTap: this.headerIconDidTap,
+                child: Column(
                 children: [
                   ClipOval(
-                      child: CachedNetworkImage(imageUrl: user?.headPhoto ?? "", placeholder: (context, url)=>Image.asset("images/place_head.png") , fit: BoxFit.cover,
-                          width: AdaptUI.rpx(180),
-                          height: AdaptUI.rpx(180))),
+                    child: Consumer<UserData>(
+                      builder: (context, userData, _)
+                          => userData.user != null
+                          ? CachedNetworkImage(
+                              imageUrl: userData.user.headPhoto,
+                              placeholder: (context, url) =>
+                                  Image.asset("images/place_head.png"),
+                              fit: BoxFit.cover,
+                              width: AdaptUI.rpx(180),
+                              height: AdaptUI.rpx(180),
+                            )
+                          : Image.asset(
+                              "images/place_head.png",
+                              width: AdaptUI.rpx(180),
+                              height: AdaptUI.rpx(180),
+                            ),
+                    ),
+                  ),
                   Container(
                     margin: EdgeInsets.only(top: AdaptUI.rpx(40)),
                     child: Center(
-                      child: Text(
-                        user?.nickName ?? "未登录",
-                        style: TextStyle(
-                          fontSize: AdaptUI.rpx(34),
-                          color: Colors.white,
+                      child: Consumer<UserData>(
+                        builder: (context, userData, _) => Text(
+                          userData?.user?.nickName ?? "未登录",
+                          style: TextStyle(
+                            fontSize: AdaptUI.rpx(34),
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
                   )
                 ],
+              ),
               ),
             ),
             Container(

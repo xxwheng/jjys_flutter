@@ -10,6 +10,10 @@ class App {
   static void navigationTo(BuildContext context, String path) {
     router.navigateTo(context, path, transition: TransitionType.cupertino);
   }
+
+  static void pop(BuildContext context) {
+    Navigator.pop(context);
+  }
 }
 
 class PageRoutes {

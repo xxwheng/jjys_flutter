@@ -2,7 +2,11 @@ import 'dart:async';
 
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
 import 'package:demo/components/tcaptcha/tc_web_widget.dart';
+import 'package:demo/data/user_data.dart';
+import 'package:demo/data/web_url_bridge.dart';
+import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:demo/utils/verify_toast.dart';
@@ -28,10 +32,19 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _codeController;
 
   /* 验证码发送校验 */
-  List<ToastRow> msgSendJudgeList;
+  List<ToastRow> _msgSendJudgeList() {
+    return [
+      ToastRow(_phoneController.text.isNotEmpty, "请输入手机号码"),
+      ToastRow(_phoneController.text.length == 11, "请输入11位手机号码")
+    ];
+  }
 
   /* 登录提交校验 */
-  List<ToastRow> loginJudgeList;
+  List<ToastRow> _loginJudgeList() {
+    return [ToastRow(_phoneController.text.isNotEmpty, "请输入手机号码"),
+      ToastRow(_phoneController.text.length == 11, "请输入11位手机号码"),
+      ToastRow(_codeController.text.isNotEmpty, "请输入验证码")];
+  }
 
   Timer _timer;
 
@@ -41,17 +54,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _phoneController = TextEditingController();
     _codeController = TextEditingController();
-
-    msgSendJudgeList = [
-      ToastRow(_phoneController.text.isNotEmpty, "请输入手机号码"),
-      ToastRow(_phoneController.text.length == 11, "请输入11位手机号码")
-    ];
-
-    loginJudgeList = [
-      ToastRow(_phoneController.text.isNotEmpty, "请输入手机号码"),
-      ToastRow(_phoneController.text.length == 11, "请输入11位手机号码"),
-      ToastRow(_codeController.text.isNotEmpty, "请输入验证码"),
-    ];
   }
 
   /* 验证、隐藏 防水墙 */
@@ -69,9 +71,9 @@ class _LoginPageState extends State<LoginPage> {
 
   /* 点击发送验证码 -> 腾讯防水墙 -> 验证码请求 -> 倒计时 */
   void _showTcaptchaDidTap() {
-//    if (!ToastUtil.judgeList(msgSendJudgeList)) {
-//      return;
-//    }
+    if (!ToastUtil.judgeList(_msgSendJudgeList())) {
+      return;
+    }
     _tcaptchaIsShow(true);
   }
 
@@ -118,14 +120,25 @@ class _LoginPageState extends State<LoginPage> {
 
   /* 点击提交登录 */
   void _submitDidTap() {
-    if (!ToastUtil.judgeList(loginJudgeList)) {
+    if (!ToastUtil.judgeList(_loginJudgeList())) {
       return;
     }
+
+    XXNetwork.shared.post(params: {
+      "methodName": "SmsCheckUser",
+      "mobile": _phoneController.text,
+      "code": _codeController.text,
+    }).then((value) {
+      UserInfoBean user = UserInfoBean.fromJson(value);
+      UserData().setUserBean(user);
+      App.pop(context);
+    });
   }
 
   /* 点击查看协议 */
-  void _gotoProtocolWebPage() {
-    App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent('hello')}",);
+  void _gotoProtocolWebPage() async {
+    String url = await WebUrlBridge.urlBridget(kUrlRegisterProtocol);
+    App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent('注册协议')}&url=${Uri.encodeComponent(url)}",);
   }
 
   @override
@@ -260,6 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     InkWell(
+                      onTap: this._submitDidTap,
                       child: Container(
                         margin: EdgeInsets.only(top: AdaptUI.rpx(40)),
                         width: AdaptUI.screenWidth - AdaptUI.rpx(60),

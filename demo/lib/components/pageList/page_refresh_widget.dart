@@ -5,11 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-/* 列表 刷新 页 */
+/* 列表页 刷新模板  */
 class PageRefreshWidget<T> extends StatelessWidget {
 
-  PageDataSource<T> pageDataSource;
-  IndexedWidgetBuilder itemBuilder;
+  final PageDataSource<T> pageDataSource;
+  final IndexedWidgetBuilder itemBuilder;
 
   PageRefreshWidget({Key key, @required this.pageDataSource, @required this.itemBuilder}): super(key: key);
 
@@ -20,8 +20,7 @@ class PageRefreshWidget<T> extends StatelessWidget {
       enablePullUp:pageDataSource.enablePullUp,
       controller: pageDataSource.refreshController,
       onRefresh: pageDataSource.onRefresh,
-      onLoading: pageDataSource.onLoadMore,
-      header: WaterDropHeader(),
+      header: BezierCircleHeader(),
       footer: CustomFooter(
         builder: (context, mode) {
           Widget body;

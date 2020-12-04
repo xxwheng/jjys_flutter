@@ -1,10 +1,13 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/common/common.dart';
+import 'package:demo/data/corp_data.dart';
 import 'package:demo/model/corp_grop_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/page/root/app.dart';
 import 'package:demo/template/a_dart/a_expansion_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /* 加盟商列表 */
 class PageCorpList extends StatefulWidget {
@@ -37,6 +40,9 @@ class _PageCorpListState extends State<PageCorpList> {
   /* 加盟商点击切换 */
   void corpItemDidTap(CorpCityBean bean) {
     logger.i("${bean.titleJiaJia} ${bean.title} ${bean.city}");
+    final corpData = Provider.of<CorpData>(context, listen: false);
+    corpData.changeCorp(bean);
+    App.pop(context);
   }
 
   @override

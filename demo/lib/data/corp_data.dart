@@ -15,15 +15,41 @@
 
 import 'dart:async';
 
+import 'package:demo/common/common.dart';
 import 'package:demo/model/corp_grop_bean.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class CorpData {
+class CorpData with ChangeNotifier {
 
   static final String corpCityKey = "corp_city_key";
+  
+  CorpCityBean corpBean;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  factory CorpData() => shared;
+
+  static final CorpData shared = CorpData._internal();
+
+  CorpData._internal() {
+    corpBean = _defaultCorpBean();
+    getCorpDataFromCache().then((value) => {
+      if (value.id != corpBean.id) {
+        this.corpBean = value
+      }
+    });
+  }
+  
+  void changeCorp(CorpCityBean corp) async {
+    if (corp.id != corpBean.id) {
+      setCorpDataCache(corp);
+      this.corpBean = corp;
+      logger.i("通知provider ${corp.city} ${corp.title} ${corp.titleJiaJia}");
+      notifyListeners();
+    }
+  }
 
   /* 存储当前加盟商corp信息 */
   Future<bool> setCorpDataCache(CorpCityBean bean) async {
@@ -46,6 +72,11 @@ class CorpData {
       CorpCityBean cacheBean = CorpCityBean.fromJson(mapJson);
       return cacheBean;
     }
+  }
+
+  /* 移除加盟商（设为默认） */
+  void removeCorpData() {
+    _prefs.then((value) => value.remove(corpCityKey));
   }
 
   CorpCityBean _defaultCorpBean() {
