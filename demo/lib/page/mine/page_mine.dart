@@ -34,6 +34,9 @@ class _PageMineState extends State<PageMine> {
   /// 点击
   void itemDidTapIndex(int index) {
     switch (index) {
+      case 0:
+        App.navigationTo(context, PageRoutes.myCouponPage);
+        break;
       case 1:
         App.navigationTo(context, PageRoutes.myCollect);
         break;

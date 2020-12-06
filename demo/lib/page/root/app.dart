@@ -34,6 +34,9 @@ class PageRoutes {
   /* 加盟商选择列表 */
   static String corpListPage = "/page/home/page_corp_list";
 
+  /* 我的优惠券 */
+  static String myCouponPage = "/page/mine/my_coupon";
+
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);
     router.define(searchArticle, handler: searchArticleHandler);
@@ -42,5 +45,6 @@ class PageRoutes {
     router.define(ysDetailPage, handler: ysDetailPageHandler);
     router.define(yyListPage, handler: yuyingListPageHandler);
     router.define(corpListPage, handler: corpListPageHandler);
+    router.define(myCouponPage, handler: myCouponPageHandler);
   }
 }

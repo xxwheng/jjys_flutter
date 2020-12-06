@@ -20,7 +20,12 @@ class CollectYsTabView extends StatefulWidget {
 }
 
 class _CollectYsTabViewState extends State<CollectYsTabView>
-    with PageDataSource<UserCollectBean> {
+    with PageDataSource<UserCollectBean>, AutomaticKeepAliveClientMixin {
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     // TODO: implement initState
