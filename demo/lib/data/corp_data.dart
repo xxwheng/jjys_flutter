@@ -35,10 +35,11 @@ class CorpData with ChangeNotifier {
 
   CorpData._internal() {
     corpBean = _defaultCorpBean();
-    getCorpDataFromCache().then((value) => {
+    getCorpDataFromCache().then((value) {
       if (value.id != corpBean.id) {
-        this.corpBean = value
+        this.corpBean = value;
       }
+      logger.d("程序启动-同步加盟商");
     });
   }
   

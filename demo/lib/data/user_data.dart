@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:demo/common/common.dart';
 import 'package:demo/model/user_info_bean.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,20 +23,50 @@ class UserData extends ChangeNotifier {
       if (value != null && value != this.user) {
         this.user = value;
         UserData.isLogin = true;
+        notifyListeners();
       }
+      logger.d("程序启动—同步登录态");
     });
   }
 
+  /* 登录成功 存储信息 */
   void loginSuccess(UserInfoBean user) {
     this.setUserBean(user);
     this.user = user;
     UserData.isLogin = true;
+    notifyListeners();
   }
 
+  /* 更新信息 */
+  void changeUser({String nick, String headPhoto, int preDay}) {
+    bool flag = false;
+    logger.i("nick: $nick \n nickname: ${this.user.nickName}");
+    if (null != nick && this.user.nickName != nick) {
+      this.user.nickName = nick;
+      flag = true;
+    }
+    if (null != headPhoto && this.user.headPhoto != headPhoto) {
+      this.user.headPhoto = headPhoto;
+      flag = true;
+    }
+    if (null != preDay && this.user.predictDay != preDay) {
+      this.user.predictDay = preDay;
+      flag = true;
+    }
+    logger.i(flag);
+    if (flag) {
+      this.setUserBean(this.user);
+      logger.i("新的: ${this.user.nickName}");
+      notifyListeners();
+    }
+  }
+
+  /* 退出 移除信息 */
   void logout() {
     this.removeUser();
     this.user = null;
     UserData.isLogin = false;
+    notifyListeners();
   }
 
   /* 获取用户缓存信息 */

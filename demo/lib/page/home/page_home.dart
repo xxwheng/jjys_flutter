@@ -184,6 +184,7 @@ class _PageHomeState extends State<PageHome> {
 
   @override
   Widget build(BuildContext context) {
+    logger.i("首页");
     return Scaffold(
         appBar: AppBar(
           title: Consumer<CorpData>(

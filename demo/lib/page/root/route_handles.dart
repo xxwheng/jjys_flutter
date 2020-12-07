@@ -5,6 +5,8 @@ import 'package:demo/page/article/page_article_search.dart';
 import 'package:demo/page/home/page_corp_list.dart';
 import 'package:demo/page/mine/login_page.dart';
 import 'package:demo/page/mine/my_coupon.dart';
+import 'package:demo/page/mine/my_info.dart';
+import 'package:demo/page/mine/my_info_nickname.dart';
 import 'package:demo/page/mine/ys_collect.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/page/yuesao/ys_detail.dart';
@@ -62,7 +64,14 @@ Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
   return SingleWebPage(title: title, url: url);
 });
 
+var myInfoPageHandler = Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) => MyInfoPage());
+
 /* 我的优惠券 */
 var myCouponPageHandler = Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) =>
         MyCouponListPage());
+
+/* 修改个人昵称*/
+var myInfoNickNameHandler = Handler(
+  handlerFunc: (BuildContext context, Map<String, dynamic> params) => MyInfoNickNamePage()
+);

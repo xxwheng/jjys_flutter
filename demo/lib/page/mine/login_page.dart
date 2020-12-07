@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
       "code": _codeController.text,
     }).then((value) {
       UserInfoBean user = UserInfoBean.fromJson(value);
-      UserData().setUserBean(user);
+      UserData.shared.loginSuccess(user);
       App.pop(context);
     });
   }

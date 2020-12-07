@@ -1,6 +1,7 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/data/corp_data.dart';
@@ -54,6 +55,7 @@ class _PageArticleState extends State<PageArticle>
 
   @override
   Widget build(BuildContext context) {
+    logger.i("文章");
     return Scaffold(
         appBar: AppBar(
           title: Consumer<CorpData>(

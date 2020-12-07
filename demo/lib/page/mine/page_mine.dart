@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
 import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/user_data.dart';
 import 'package:demo/model/user_info_bean.dart';
@@ -25,13 +28,10 @@ class _PageMineState extends State<PageMine> {
     Icon(Icons.privacy_tip_outlined, color: UIColor.hex666)
   ];
 
-  UserInfoBean user;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadUserInfo();
   }
 
   /* 点击头像 */
@@ -40,6 +40,7 @@ class _PageMineState extends State<PageMine> {
       App.navigationTo(context, PageRoutes.loginPage);
       return;
     }
+    App.navigationTo(context, PageRoutes.myInfoPage);
   }
 
   /// 点击
@@ -59,15 +60,6 @@ class _PageMineState extends State<PageMine> {
     }
   }
 
-  /// 个人信息
-  void loadUserInfo() async {
-    XXNetwork.shared.post(params: {"methodName": "UserInfo"}).then((value) {
-      UserInfoBean user = UserInfoBean.fromJson(value);
-      setState(() {
-        this.user = user;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +72,8 @@ class _PageMineState extends State<PageMine> {
       ),
       body: Container(
         color: Colors.white,
-        child: Column(
+        child: ListView(
+          physics: NeverScrollableScrollPhysics(),
           children: [
             Container(
               color: UIColor.mainColor,
@@ -89,42 +82,43 @@ class _PageMineState extends State<PageMine> {
               child: GestureDetector(
                 onTap: this.headerIconDidTap,
                 child: Column(
-                children: [
-                  ClipOval(
-                    child: Consumer<UserData>(
-                      builder: (context, userData, _)
-                          => userData.user != null
-                          ? CachedNetworkImage(
-                              imageUrl: userData.user.headPhoto,
-                              placeholder: (context, url) =>
-                                  Image.asset("images/place_head.png"),
-                              fit: BoxFit.cover,
-                              width: AdaptUI.rpx(180),
-                              height: AdaptUI.rpx(180),
-                            )
-                          : Image.asset(
-                              "images/place_head.png",
-                              width: AdaptUI.rpx(180),
-                              height: AdaptUI.rpx(180),
-                            ),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(top: AdaptUI.rpx(40)),
-                    child: Center(
+                  children: [
+                    ClipOval(
                       child: Consumer<UserData>(
-                        builder: (context, userData, _) => Text(
-                          userData?.user?.nickName ?? "未登录",
-                          style: TextStyle(
-                            fontSize: AdaptUI.rpx(34),
-                            color: Colors.white,
-                          ),
-                        ),
+                        builder: (context, userData, _) => userData.user != null
+                            ? CachedNetworkImage(
+                                imageUrl: userData.user.headPhoto,
+                                placeholder: (context, url) =>
+                                    Image.asset("images/place_head.png"),
+                                fit: BoxFit.cover,
+                                width: AdaptUI.rpx(180),
+                                height: AdaptUI.rpx(180),
+                              )
+                            : Image.asset(
+                                "images/place_head.png",
+                                width: AdaptUI.rpx(180),
+                                height: AdaptUI.rpx(180),
+                              ),
                       ),
                     ),
-                  )
-                ],
-              ),
+                    Container(
+                      margin: EdgeInsets.only(top: AdaptUI.rpx(40)),
+                      child: Center(
+                        child:
+                            Consumer<UserData>(builder: (context, userData, _) {
+                          logger.i("重置用户名");
+                          return Text(
+                            userData?.user?.nickName ?? "未登录",
+                            style: TextStyle(
+                              fontSize: AdaptUI.rpx(34),
+                              color: Colors.white,
+                            ),
+                          );
+                        }),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
             Container(

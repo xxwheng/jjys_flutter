@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Material App',
       theme: ThemeData(primaryColor: UIColor.mainColor),
+      debugShowCheckedModeBanner: false,
       onGenerateRoute: App.router.generator,
       home: Scaffold(
         // appBar: AppBar(

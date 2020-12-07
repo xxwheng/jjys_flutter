@@ -1,4 +1,3 @@
-
 import 'package:demo/common/common.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -16,7 +15,6 @@ class ToastRow {
 }
 
 class ToastUtil {
-
   /* 校验一系列验证 */
   static bool judgeList(List<ToastRow> tipList) {
     for (int i = 0; i < tipList.length; i++) {

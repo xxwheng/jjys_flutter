@@ -14,20 +14,9 @@ class TabBarController extends StatefulWidget {
 
 class _TabBarControllerState extends State<TabBarController> {
 
+  final List<Widget> _tabPagesList = [PageHome(), PageArticle(), PageOrder(), PageMine()];
+
   int _selectedIndex = 0;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-//    insertOverlayEntity();
-  }
 
   double alpha = 1.0;
 
@@ -80,15 +69,14 @@ class _TabBarControllerState extends State<TabBarController> {
     currentIndex: _selectedIndex,
     onTap: _tabBarDidTap,);
   }
-  
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: [
-          PageHome(), PageArticle(), PageOrder(), PageMine()
-        ],
+        children: _tabPagesList,
       ),
       bottomNavigationBar: createTabBar(),
     );

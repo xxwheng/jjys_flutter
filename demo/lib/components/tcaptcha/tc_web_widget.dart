@@ -64,8 +64,8 @@ class _TCaptchaWebWidgetState extends State<TCaptchaWebWidget> {
           Align(
             alignment: Alignment(0, -0.3),
             child: Container(
-              width: AdaptUI.rpx(470),
-              height: AdaptUI.rpx(470),
+              width: 260,
+              height: 260,
               child: WebViewPlus(
                 javascriptMode: JavascriptMode.unrestricted,
                 onWebViewCreated: (WebViewPlusController controller) {

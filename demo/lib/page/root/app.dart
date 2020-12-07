@@ -47,6 +47,12 @@ class PageRoutes {
   /* 我的优惠券 */
   static String myCouponPage = "/page/mine/my_coupon";
 
+  /* 个人信息 */
+  static String myInfoPage = "/page/mine/my_info";
+
+  /* 修改个人昵称 */
+  static String myInfoNickNamePage = "/page/mine/my_info_nickname";
+
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);
     router.define(searchArticle, handler: searchArticleHandler);
@@ -58,5 +64,7 @@ class PageRoutes {
     router.define(loginPage, handler: loginPageHandler);
     router.define(singleWebPage, handler: singleWebPageHandler);
     router.define(myCouponPage, handler: myCouponPageHandler);
+    router.define(myInfoPage, handler: myInfoPageHandler);
+    router.define(myInfoNickNamePage, handler: myInfoNickNameHandler);
   }
 }
