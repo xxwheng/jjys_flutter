@@ -14,6 +14,7 @@ class YsCollectPage extends StatefulWidget {
 }
 
 class _YsCollectPageState extends State<YsCollectPage> {
+
   final List<String> navList = ["月嫂", "育婴师"];
   TabController _controller;
 

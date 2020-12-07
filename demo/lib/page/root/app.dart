@@ -44,6 +44,9 @@ class PageRoutes {
   /* 单一网页嵌套 */
   static String singleWebPage = "/components/web/single_web";
 
+  /* 我的优惠券 */
+  static String myCouponPage = "/page/mine/my_coupon";
+
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);
     router.define(searchArticle, handler: searchArticleHandler);
@@ -54,5 +57,6 @@ class PageRoutes {
     router.define(corpListPage, handler: corpListPageHandler);
     router.define(loginPage, handler: loginPageHandler);
     router.define(singleWebPage, handler: singleWebPageHandler);
+    router.define(myCouponPage, handler: myCouponPageHandler);
   }
 }

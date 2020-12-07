@@ -50,6 +50,9 @@ class _PageMineState extends State<PageMine> {
     }
 
     switch (index) {
+      case 0:
+        App.navigationTo(context, PageRoutes.myCouponPage);
+        break;
       case 1:
         App.navigationTo(context, PageRoutes.myCollect);
         break;

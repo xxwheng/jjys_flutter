@@ -4,6 +4,7 @@ import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/article/page_article_search.dart';
 import 'package:demo/page/home/page_corp_list.dart';
 import 'package:demo/page/mine/login_page.dart';
+import 'package:demo/page/mine/my_coupon.dart';
 import 'package:demo/page/mine/ys_collect.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/page/yuesao/ys_detail.dart';
@@ -54,9 +55,14 @@ var loginPageHandler = Handler(
 
 /* 单一网页 */
 var singleWebPageHandler =
-    Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
   logger.i(params);
   String title = params["title"]?.first?.toString();
   String url = params["url"]?.first?.toString();
   return SingleWebPage(title: title, url: url);
 });
+
+/* 我的优惠券 */
+var myCouponPageHandler = Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) =>
+        MyCouponListPage());
