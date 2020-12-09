@@ -57,45 +57,34 @@ class PageDataSource<T> implements PageInterface {
     this.list = tempList;
     endRefreshing();
     setState((){});
-
   }
 
 
   /* 结束刷新/加载  status 成功/失败 */
   void endRefreshing({bool status = true}) {
-    print("111");
     if (status) {
-      print("112");
       if (refreshController.isRefresh) {
         /// 正在刷新
-        print("113");
         refreshController.refreshCompleted(resetFooterState: true);
       } else if (refreshController.isLoading) {
         /// 正在加载
-        print("114");
         if (hasMore) {
-          print("115");
           refreshController.loadComplete();
         } else {
-          print("116");
           refreshController.loadNoData();
         }
       }
       /// 第一页刚加载
       if (hasMore) {
-        print("116");
         refreshController.loadComplete();
       } else {
         refreshController.loadNoData();
       }
     } else {
-      print("11");
       if (refreshController.isRefresh) {
-        print("11");
         refreshController.refreshFailed();
       }
       if (refreshController.isLoading) {
-        print("11");
         refreshController.loadFailed();
       }
     }

@@ -29,6 +29,11 @@ class UIColor {
   // 分割线、下划线
   static const Color hexEEE = Color(0xffe5e5e5);
 
+  static const Color hexBE = Color(0xffbebebe);
+
+  // 主题边框颜色
+  static const Color borderMain = Color(0xff9556bf);
+
 }
 
 class UITextStyle {

@@ -1,4 +1,5 @@
 
+import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/mine/ys_collect.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,11 @@ class App {
 
   static void navigationTo(BuildContext context, String path) {
     router.navigateTo(context, path, transition: TransitionType.cupertino);
+  }
+
+  static void navigationToWeb(BuildContext context, String title, String path) async {
+    String url = await WebUrlBridge.urlBridget(path);
+    App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent(title)}&url=${Uri.encodeComponent(url)}",);
   }
 
   static void pop(BuildContext context) {

@@ -42,8 +42,10 @@ var yuyingListPageHandler = Handler(
 
 /* 月嫂详情 */
 var ysDetailPageHandler = Handler(
-    handlerFunc: (BuildContext context, Map<String, dynamic> params) =>
-        YsDetailPage());
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      String id = params['id']?.first?.toString();
+      return YsDetailPage(id: id);
+    });
 
 /* 加盟商列表 */
 var corpListPageHandler = Handler(

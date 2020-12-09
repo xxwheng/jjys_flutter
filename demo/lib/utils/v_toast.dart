@@ -7,7 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 class VToast {
 
   static show(String msg) {
-    Fluttertoast.showToast(msg: msg, gravity: ToastGravity.CENTER);
+    Fluttertoast.showToast(msg: msg, toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.CENTER);
   }
 
   static Future<void> showThen(String msg) async {

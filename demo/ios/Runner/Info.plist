@@ -29,6 +29,10 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>访问您的相机用来拍照上传图片</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>访问您的相册用来上传图片</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -44,17 +44,31 @@ dependencies:
   # 日期picker
   flutter_datetime_picker: ^1.4.0
   # 日历
-  flutter_rounded_date_picker: 1.0.5
+  flutter_rounded_date_picker: ^1.0.5
+  # 格式化日期
+  date_format: ^1.0.9
   # UI 布局尺寸
   adaptui:
     git: https://github.com/xxwheng/adaptui.git
+  # 日志打印
   logger: ^0.9.4
+  # 数据共享
   provider: ^4.3.2+2
+  # 缓存
   shared_preferences: ^0.5.12+4
+  # js 交互
   webview_flutter: ^1.0.7
   webview_flutter_plus: ^0.1.1+10
+  # 加密
   crypto: ^2.1.5
+  # toast
   fluttertoast: ^7.1.5
+  # 相册选择
+  image_picker: ^0.6.7+14
+  # 图片压缩
+  flutter_native_image: ^0.0.5
+  # loading
+  flutter_spinkit: ^4.1.2
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +105,9 @@ flutter:
     - images/ys_heart.png
     - images/ys_score.png
     - images/ys_star.png
+    - images/coupon_late.png
+    - images/coupon_used.png
+    - images/coupon_line.png
     - images/image01.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -16,6 +16,7 @@ import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/utils/single_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
@@ -23,6 +24,14 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 class YuesaoListPage extends StatefulWidget {
   @override
   _YuesaoListPageState createState() => _YuesaoListPageState();
+}
+
+YsListBean jsonParseCompute(json) {
+return YsListBean.fromJson(json);
+}
+
+ConfigYsWorkBean parseConfigCompute(dynamic value) {
+  return ConfigYsWorkBean.fromJson(value);
 }
 
 class _YuesaoListPageState extends State<YuesaoListPage>
@@ -78,15 +87,14 @@ class _YuesaoListPageState extends State<YuesaoListPage>
   void initData() {
     filterProvince = ProvinceBean("", "");
     var titleArr = ["不限", "30岁以下", "30~40岁", "40岁以上"];
-    setState(() {
+//    setState(() {
       yearFilterArray = titleArr
           .asMap()
           .keys
           .map((e) => YsFilterYearBean(e, titleArr[e]))
           .toList();
-    });
+//    });
     yearBean = yearFilterArray[0];
-    print(yearFilterArray.length);
   }
 
   /// 菜单栏 icon
@@ -195,20 +203,39 @@ class _YuesaoListPageState extends State<YuesaoListPage>
       "region": "${filterProvince?.code ?? 0}",
       "predict_day": timestamp
     }).then((res) {
-      var ysList = YsListBean.fromJson(res);
-      var page = int.parse(ysList.page.toString());
-      var total = int.parse(ysList.total.toString());
-      addList(ysList.data, page, total, setState);
+//      var ysList = YsListBean.fromJson(res);
+//      var page = int.parse(ysList.page.toString());
+//      var total = int.parse(ysList.total.toString());
+//      addList(ysList.data, page, total, setState);
+      parseFunc(res);
     }).catchError((err) {
       this.endRefreshing(status: false);
     }).whenComplete(() {});
   }
+
+  void parseFunc(dynamic res) async {
+    YsListBean ysList = await compute(jsonParseCompute, res);
+    var page = int.parse(ysList.page.toString());
+    var total = int.parse(ysList.total.toString());
+    addList(ysList.data, page, total, setState);
+  }
+
+  void parseConfig(dynamic value) async {
+    ConfigYsWorkBean configBean = await compute(parseConfigCompute, value);
+    this.dayBuy = configBean.serviceDayArr?.first?.toString() ?? "26";
+    this.configBean = configBean;
+    setState(() {
+    });
+  }
+
 
   /* 筛选配置 */
   void loadYuesaoConfigWork() async {
     XXNetwork.shared.post(params: {
       "methodName": "ConfigYuesaoOnwork",
     }).then((value) {
+      parseConfig(value);
+      return;
       ConfigYsWorkBean configBean = ConfigYsWorkBean.fromJson(value);
       setState(() {
         this.dayBuy = configBean.serviceDayArr?.first.toString() ?? "26";
@@ -224,7 +251,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
 
   /* 点击进入育婴师详情 */
   void ysItemDidTap(YsItemBean item) {
-    App.navigationTo(context, PageRoutes.ysDetailPage);
+    App.navigationTo(context, PageRoutes.ysDetailPage+'?id=${item.id}');
   }
 
   @override

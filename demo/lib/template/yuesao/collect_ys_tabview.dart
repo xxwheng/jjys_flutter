@@ -5,7 +5,9 @@ import 'package:demo/model/user_collect_bean.dart';
 import 'package:demo/model/ys_item_bean.dart';
 import 'package:demo/model/ys_list_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/page/root/app.dart';
 import 'package:demo/template/yuesao/cell_yuesao.dart';
+import 'package:demo/utils/v_toast.dart';
 import 'package:flutter/material.dart';
 
 class CollectYsTabView extends StatefulWidget {
@@ -55,13 +57,35 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
     }).whenComplete(() {});
   }
 
+  /* 点击进详情 */
+  void _gotoDetails(UserCollectBean bean) {
+    if (bean.type == "1") {
+      App.navigationTo(context, PageRoutes.ysDetailPage+'?id=${bean.info.id}');
+    } else {
+    }
+  }
+
+  /* 请求取消 */
+  void _reqCancel(UserCollectBean bean) {
+    XXNetwork.shared.post(params: {
+      "methodName": "YuesaoCollectCancel",
+      "yuesao_id": bean.info.id,
+      "role": bean.type
+    }).then((value) {
+      VToast.show("取消成功");
+      setState(() {
+        list.remove(bean);
+      });
+    });
+  }
+
   @override
+  // ignore: must_call_super
   Widget build(BuildContext context) {
     return PageRefreshWidget(
       pageDataSource: this,
       itemBuilder: (context, index) {
         UserCollectYsInfoBean item = list[index].info;
-
         return Container(
           padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
           margin: EdgeInsets.only(
@@ -84,8 +108,9 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
               score: "${item.scoreComment}",
               price: item.price,
               service: item.service,
+              cancelTap: () => _reqCancel(list[index]),
             ),
-            onTapUp: (TapUpDetails detail) {},
+            onTapUp: (TapUpDetails detail) => _gotoDetails(list[index]),
           ),
         );
       },

@@ -1,13 +1,19 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:date_format/date_format.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/common/common.dart';
 import 'package:demo/data/user_data.dart';
 import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
+import 'package:demo/utils/load/loading.dart';
+import 'package:demo/utils/v_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class MyInfoPage extends StatefulWidget {
@@ -16,7 +22,6 @@ class MyInfoPage extends StatefulWidget {
 }
 
 class _MyInfoPageState extends State<MyInfoPage> {
-
   @override
   void initState() {
     // TODO: implement initState
@@ -30,13 +35,51 @@ class _MyInfoPageState extends State<MyInfoPage> {
       String headPhoto = value["headphoto"] as String;
       String nick = value["nickname"] as String;
       int preDay = int.parse(value["predict_day"].toString());
-      UserData.shared.changeUser(nick: nick, headPhoto: headPhoto, preDay: preDay);
+      UserData.shared
+          .changeUser(nick: nick, headPhoto: headPhoto, preDay: preDay);
     });
   }
 
+  /* 请求 更改生日 */
+  void reqChangeBirthday(DateTime time) {
+    String dayStr = time.toString().split(" ").first;
+    int dayStamp = time.millisecondsSinceEpoch~/1000;
+    XXNetwork.shared.post(params: {
+      "methodName": "UserInfoUpdate",
+      "predict_day": dayStamp
+    }).then((value) {
+      UserData.shared.changeUser(preDay: dayStamp);
+      VToast.show("修改成功");
+    });
+  }
+
+  /* 请求 上传图片 */
+  void reqPhoto(String path) {
+    Loading.show(context);
+    XXNetwork.shared.upload(filePath: path).then((value) {
+      String domain = value['domain'] as String;
+      String path = value['path'] as String;
+      this.reqChangePhoto(domain, path);
+    }).catchError((e) => Loading.dismiss(context));
+  }
+
+  /* 请求 修改图片 */
+  void reqChangePhoto(String domain, String path) {
+    XXNetwork.shared.post(params: {
+      "methodName":"UserInfoUpdate",
+      "headphoto":path
+    }).then((value) {
+      UserData.shared.changeUser(headPhoto: domain+path);
+      VToast.show("上传成功");
+    }).whenComplete(() => Loading.dismiss(context));
+  }
+
   /* 点击选择头像 */
-  void _chooseImage() {
+  void _chooseImage() async {
     logger.i("chooseImage");
+    ImagePicker().getImage(source: ImageSource.gallery).then((value) {
+      this.reqPhoto(value.path);
+    });
   }
 
   /* 修改昵称*/
@@ -45,31 +88,36 @@ class _MyInfoPageState extends State<MyInfoPage> {
   }
 
   /* 修改预产期*/
-  void _changeBirthday() {}
+  void _changeBirthday() {
+    DatePicker.showDatePicker(context, onConfirm: (DateTime time) {
+      this.reqChangeBirthday(time);
+    }, locale: LocaleType.zh);
+  }
 
   /* 退出登录 */
   void _quitButtonDidTap() {
     showCupertinoDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) => CupertinoAlertDialog(
-              title: Text("确定要退出登录吗?"),
-              actions: [
-                CupertinoDialogAction(
-                  child: Text("取消"),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                CupertinoDialogAction(
-                  child: Text("确定"),
-                  onPressed: () {
-                    logger.i("确定");
-                    UserData.shared.logout();
-                    Navigator.of(context).pop();
-                    App.pop(this.context);
-                  },
-                )
-              ],
-            ),);
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text("确定要退出登录吗?"),
+        actions: [
+          CupertinoDialogAction(
+            child: Text("取消"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          CupertinoDialogAction(
+            child: Text("确定"),
+            onPressed: () {
+              logger.i("确定");
+              UserData.shared.logout();
+              Navigator.of(context).pop();
+              App.pop(this.context);
+            },
+          )
+        ],
+      ),
+    );
   }
 
   @override
@@ -161,7 +209,7 @@ class _MyInfoPageState extends State<MyInfoPage> {
             ),
           ),
           GestureDetector(
-            onTap: _changeNickName,
+            onTap: _changeBirthday,
             child: Container(
               height: AdaptUI.rpx(110),
               padding: EdgeInsets.only(left: 15, right: 15),
@@ -172,10 +220,16 @@ class _MyInfoPageState extends State<MyInfoPage> {
               child: Row(
                 children: [
                   Text("宝妈预产期/宝宝生日"),
-                  Expanded(
-                      child: Text("2020-07-16",
+                  Expanded(child: Consumer<UserData>(
+                    builder: (BuildContext context, UserData data, child) {
+                      DateTime date = DateTime.fromMillisecondsSinceEpoch(
+                          data.user.predictDay * 1000);
+                      var dateStr = formatDate(date, [yyyy, '-', mm, '-', dd]);
+                      return Text(dateStr,
                           textAlign: TextAlign.right,
-                          style: TextStyle(color: UIColor.hex666))),
+                          style: TextStyle(color: UIColor.hex666));
+                    },
+                  )),
                   Icon(
                     Icons.navigate_next,
                     size: AdaptUI.rpx(40),

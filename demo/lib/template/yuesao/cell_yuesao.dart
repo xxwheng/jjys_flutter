@@ -141,13 +141,12 @@ class CellYuesao extends StatelessWidget {
                                             Border.all(color: UIColor.hex999),
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(AdaptUI.rpx(22)))),
-                                    child: Text(
+                                    child: Center(child:  Text(
                                       "取消关注",
-                                      textAlign: TextAlign.center,
                                       style: TextStyle(
                                           fontSize: AdaptUI.rpx(25),
                                           color: UIColor.mainColor),
-                                    ),
+                                    )),
                                   ),
                                 )
                               : Offstage(),

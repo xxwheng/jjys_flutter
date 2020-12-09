@@ -1,6 +1,13 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
+import 'package:demo/data/web_url_bridge.dart';
+import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/page/root/app.dart';
 import 'package:demo/template/mine/my_coupon_tabview.dart';
+import 'package:demo/utils/dialog/coupon_dialog.dart';
+import 'package:demo/utils/v_toast.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 /* 我的优惠券列表 */
@@ -10,8 +17,6 @@ class MyCouponListPage extends StatefulWidget {
 }
 
 class _MyCouponListPageState extends State<MyCouponListPage> {
-
-
 
   TabController _controller;
 
@@ -26,6 +31,41 @@ class _MyCouponListPageState extends State<MyCouponListPage> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /* 优惠券使用规则 */
+  void _couponRuleTap() {
+    App.navigationToWeb(context, "优惠券使用规则", kUrlRegisterProtocol);
+  }
+
+  void _reqExchangeCoupon(String code) {
+    if (code.isEmpty) {
+      VToast.show("请输入兑换码");
+      return;
+    }
+    XXNetwork.shared
+        .post(params: {"code": code, "methodName": "CouponPwChange"}).then((value) {
+          /// 兑换成功
+      VToast.show("兑换成功");
+      _dialog.hide();
+    });
+  }
+
+  CouponDialog _dialog;
+
+  void _showDialog() {
+    if (null == _dialog) {
+      _dialog = CouponDialog();
+      _dialog.tapCallBack = _reqExchangeCoupon;
+    }
+    _dialog.show(context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -35,51 +75,63 @@ class _MyCouponListPageState extends State<MyCouponListPage> {
       ),
       body: Column(
         children: [
-          Container(
-            margin: EdgeInsets.only(
-                left: AdaptUI.rpx(30),
-                right: AdaptUI.rpx(30),
-                top: AdaptUI.rpx(48)),
-            height: AdaptUI.rpx(80),
-            padding:
-                EdgeInsets.only(left: AdaptUI.rpx(30), right: AdaptUI.rpx(10)),
-            decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: UIColor.hexEEE),
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.label_rounded,
-                  color: UIColor.mainColor,
-                ),
-                Expanded(
-                    child: Text(
-                  "兑换优惠券",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: UIColor.mainColor),
-                )),
-                Icon(
-                  Icons.navigate_next,
-                  color: UIColor.hexEEE,
-                )
-              ],
+          GestureDetector(
+            onTap: _showDialog,
+            child: Container(
+              margin: EdgeInsets.only(
+                  left: AdaptUI.rpx(30),
+                  right: AdaptUI.rpx(30),
+                  top: AdaptUI.rpx(48)),
+              height: AdaptUI.rpx(90),
+              padding: EdgeInsets.only(
+                  left: AdaptUI.rpx(30), right: AdaptUI.rpx(10)),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: UIColor.hexEEE),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.label_rounded,
+                    size: AdaptUI.rpx(50),
+                    color: UIColor.mainColor,
+                  ),
+                  Expanded(
+                      child: Text(
+                    "兑换优惠券",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: UIColor.mainColor),
+                  )),
+                  Icon(
+                    Icons.navigate_next,
+                    color: UIColor.hex999,
+                  )
+                ],
+              ),
             ),
           ),
-          Container(
-            padding: EdgeInsets.only(
-                top: AdaptUI.rpx(20),
-                right: AdaptUI.rpx(40),
-                bottom: AdaptUI.rpx(20)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Icon(
-                  Icons.help_outline,
-                  color: UIColor.hex666,
-                ),
-                Text("  使用规则")
-              ],
+          GestureDetector(
+            onTap: _couponRuleTap,
+            child: Container(
+              padding: EdgeInsets.only(
+                  top: AdaptUI.rpx(20),
+                  right: AdaptUI.rpx(40),
+                  bottom: AdaptUI.rpx(20)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.help_outline,
+                    size: AdaptUI.rpx(40),
+                    color: UIColor.hex999,
+                  ),
+                  Text(
+                    "  使用规则",
+                    style: TextStyle(
+                        fontSize: AdaptUI.rpx(28), color: UIColor.hex666),
+                  )
+                ],
+              ),
             ),
           ),
           Container(
@@ -99,13 +151,19 @@ class _MyCouponListPageState extends State<MyCouponListPage> {
             ),
           ),
           Expanded(
-              child: TabBarView(
-                controller: _controller,
-                children: _tabWidgetList.asMap().keys.map((e) => MyCouponTableView(type: e+1,)).toList(),
-          ),),
+            child: TabBarView(
+              controller: _controller,
+              children: _tabWidgetList
+                  .asMap()
+                  .keys
+                  .map((e) => MyCouponTableView(
+                        type: e + 1,
+                      ))
+                  .toList(),
+            ),
+          ),
         ],
       ),
     );
   }
-
 }

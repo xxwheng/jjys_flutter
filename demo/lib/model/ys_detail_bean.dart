@@ -79,7 +79,7 @@ class YsDetailProfileBean {
 
   factory YsDetailProfileBean.fromJson(Map<String, dynamic> json) {
     return YsDetailProfileBean(
-        json['id'].toString(), json['age'] as int, json['birthday'] as int, json['comment_score'] as int,
+        json['id'].toString(), json['age'] as int, json['birthday'] as int, int.parse(json['comment_score'].toString())??0,
         json['credit'].toString(), json['level'].toString(), json['service'].toString(), json['citycode'].toString(),
         json['cityname'].toString(), json['nickname'].toString(), json['price'].toString(), json['price_market'].toString(),
         json['province'].toString(), json['province_text'].toString(), json['headphoto'].toString(), json['image'].toString(),
