@@ -136,7 +136,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
 
   /* 导航按钮点击 */
   void navItemDidTap(int index) {
-    print("${this.navIndex}  $index");
     if (this.navIndex == index) {
       if (index < this.navArray.length - 1 && index > 0) {
         this.navArray[index]["desc"] =

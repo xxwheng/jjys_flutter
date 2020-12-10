@@ -2,6 +2,7 @@ import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/template/yuesao/collect_ys_tabview.dart';
@@ -66,7 +67,7 @@ class _YsCollectPageState extends State<YsCollectPage> {
                     .asMap()
                     .keys
                     .map((e) => CollectYsTabView(
-                          type: e + 1,
+                          type: jjRoleType(e+1),
                         ))
                     .toList(),
               ),

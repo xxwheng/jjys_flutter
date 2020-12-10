@@ -31,6 +31,21 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primaryColor: UIColor.mainColor),
       debugShowCheckedModeBanner: false,
       onGenerateRoute: App.router.generator,
+      builder: (context, child) {
+        return Scaffold(
+          body: GestureDetector(
+            /* 点击空白隐藏键盘 */
+            onTap: () {
+              FocusScopeNode currentFocus = FocusScope.of(context);
+              if (!currentFocus.hasPrimaryFocus &&
+                  currentFocus.focusedChild != null) {
+                FocusManager.instance.primaryFocus.unfocus();
+              }
+            },
+            child: child,
+          ),
+        );
+      },
       home: Scaffold(
         // appBar: AppBar(
         //   title: Text('Material App Bar'),

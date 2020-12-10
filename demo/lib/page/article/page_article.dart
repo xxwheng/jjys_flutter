@@ -41,7 +41,6 @@ class _PageArticleState extends State<PageArticle>
   void loadCategoryList() async {
     XXNetwork.shared
         .post(params: {"methodName": "ArticleCategoryList"}).then((res) {
-      print(res);
       var categoryList = (res["data"] as List)
           ?.map((e) => e == null ? null : ArticleCategoryBean.fromJson(e))
           ?.toList();

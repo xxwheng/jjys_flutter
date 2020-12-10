@@ -80,20 +80,10 @@ class _MenuScrollWidgetState extends State<MenuScrollWidget> {
     }
   }
 
-
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-    print("menu_didChangeDependencies");
-  }
-
   @override
   void didUpdateWidget(covariant MenuScrollWidget oldWidget) {
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
-    print("menu_didUpdateWidget");
     readyWidgetFrame();
   }
 
@@ -119,7 +109,6 @@ class _MenuScrollWidgetState extends State<MenuScrollWidget> {
   @override
   Widget build(BuildContext context) {
 
-    print("menu_build");
     return widget.menuList == null || widget.menuList.isEmpty
         ? Container()
         : Container(

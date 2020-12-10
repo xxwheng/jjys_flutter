@@ -1,6 +1,7 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/utils/ys_level.dart';
 import 'package:flutter/material.dart';
 
@@ -8,12 +9,12 @@ import 'package:flutter/material.dart';
 class YuesaoHeadLevelWidget extends StatelessWidget {
   final String headUrl;
   final String level;
-  /// 1 月嫂  2 育婴师
-  final int type;
+  /// 角色
+  final JJRoleType type;
   final String careType;
   
   
-  YuesaoHeadLevelWidget({Key key, @required this.headUrl, @required this.level, this.type = 1, this.careType}): super(key: key);
+  YuesaoHeadLevelWidget({Key key, @required this.headUrl, @required this.level, this.type = JJRoleType.matron, this.careType}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,7 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
         Container(
           margin: EdgeInsets.only(top: AdaptUI.rpx(10)),
           child: Text(
-            type == 1 ? YsLevel.getYuesaoLevel(level) : YsLevel.getYuyingLevel(level, type: careType),
+            type == JJRoleType.matron ? YsLevel.getYuesaoLevel(level) : YsLevel.getYuyingLevel(level, type: careType),
             style: TextStyle(fontSize: AdaptUI.rpx(28), fontWeight: FontWeight.w500, color: Color(0xffcc3399)),
           ),
         )

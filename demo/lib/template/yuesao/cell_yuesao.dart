@@ -1,5 +1,6 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/model/ys_item_bean.dart';
 import 'package:flutter/material.dart';
 
@@ -7,8 +8,8 @@ import 'package:demo/slice/ys_head_level.dart';
 import 'package:demo/slice/ys_name_auth.dart';
 
 class CellYuesao extends StatelessWidget {
-  /// 1 月嫂  2育婴师
-  final int type;
+  /// 角色
+  final JJRoleType type;
   final String headPhoto;
   final bool isCredit;
   final String level;
@@ -23,7 +24,7 @@ class CellYuesao extends StatelessWidget {
 
   CellYuesao(
       {Key key,
-      this.type = 1,
+      this.type = JJRoleType.matron,
       this.headPhoto,
       this.isCredit,
       this.level,

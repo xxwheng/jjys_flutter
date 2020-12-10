@@ -99,7 +99,6 @@ class _PageHomeState extends State<PageHome> {
       setState(() {
         this.articleList = articleList;
       });
-      print(articleList.first.title);
     });
   }
 
@@ -115,7 +114,6 @@ class _PageHomeState extends State<PageHome> {
                   ? null
                   : CommentBean.fromJson(e as Map<String, dynamic>))
               ?.toList();
-          print(list.first.content);
 
           var homeData = HomeBean.fromJson(res);
           homeData.adArr = [];
@@ -139,7 +137,6 @@ class _PageHomeState extends State<PageHome> {
                   HttpConfig.webUrl + e.info_yuesao.headPhoto;
             }
           });
-          print("更新数据");
           setState(() {
             this.homeData = homeData;
             this._bannerLoop = true;

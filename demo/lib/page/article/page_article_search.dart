@@ -53,7 +53,6 @@ class _PageArticleSearchState extends State<PageArticleSearch> with PageDataSour
 
       addList(articleList, page, total, setState);
     }).catchError((err) {
-      print(err);
       this.endRefreshing(status: false);
     });
   }

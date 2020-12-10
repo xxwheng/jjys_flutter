@@ -1,6 +1,7 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/model/user_collect_bean.dart';
 import 'package:demo/model/ys_item_bean.dart';
 import 'package:demo/model/ys_list_bean.dart';
@@ -12,8 +13,8 @@ import 'package:flutter/material.dart';
 
 class CollectYsTabView extends StatefulWidget {
 
-  /// 1 月嫂   2 育婴师
-  final int type;
+  ///  角色类型
+  final JJRoleType type;
 
   CollectYsTabView({Key key, @required this.type}): super(key: key);
 
@@ -52,7 +53,6 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
       var total = int.parse(res['total'].toString());
       addList(collectList, page, total, setState);
     }).catchError((err) {
-      print(err);
       this.endRefreshing(status: false);
     }).whenComplete(() {});
   }

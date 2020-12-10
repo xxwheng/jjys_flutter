@@ -1,5 +1,7 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/model/config_yswork_bean.dart';
 import 'package:demo/model/level_bean.dart';
 import 'package:demo/model/province_bean.dart';
@@ -14,6 +16,7 @@ import 'package:demo/slice/ys_wrap_multi_filter.dart';
 import 'package:demo/template/yuesao/cell_yuesao.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
+import 'package:demo/utils/bus/data_bus.dart';
 import 'package:demo/utils/single_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +29,10 @@ class YuyingListPage extends StatefulWidget {
 }
 
 class _YuyingListPageState extends State<YuyingListPage>
-    with PageDataSource<YsItemBean>, SingleTickerProviderStateMixin {
+    with PageDataSource<YsItemBean>, SingleTickerProviderStateMixin, MultiDataLine {
+
+  final String _keyWork = "workKey";
+
   int navIndex = 0;
   List<Map<String, String>> navArray = [
     {"title": "综合", "desc": "1"},
@@ -77,6 +83,13 @@ class _YuyingListPageState extends State<YuyingListPage>
     loadYuyingConfigWork();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    dataBusDispose();
+    super.dispose();
+  }
+
   void initData() {
     filterProvince = ProvinceBean("", "");
     var careTypeTitleArr = ["不限", "育婴护理师", "育儿护理师", "幼儿护理师"];
@@ -94,7 +107,7 @@ class _YuyingListPageState extends State<YuyingListPage>
         .map((e) => YuyingFilterCareTypeBean(e, careTypeTitleArr[e]))
         .toList();
     careTypeBean = careTypeFilterArray[0];
-    setState(() {});
+//    setState(() {});
   }
 
   /// 菜单栏 icon
@@ -196,9 +209,9 @@ class _YuyingListPageState extends State<YuyingListPage>
       "methodName": "ConfigYuesaoOnwork",
     }).then((value) {
       ConfigYsWorkBean configBean = ConfigYsWorkBean.fromJson(value);
-      setState(() {
-        this.configBean = configBean;
-      });
+//      setState(() {
+//        this.configBean = configBean;
+//      });
     });
   }
 
@@ -259,7 +272,6 @@ class _YuyingListPageState extends State<YuyingListPage>
             .map((e) => e.cityName)
             .toList(),
         itemChanged: (index) {
-          print(configBean.provinceYuyingArr[index].code);
           setState(() {
             this.filterProvince =
             configBean.provinceYuyingArr[index];
@@ -302,24 +314,25 @@ class _YuyingListPageState extends State<YuyingListPage>
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
                     child: GestureDetector(
-                      child: CellYuesao(
-                        type: 2,
-                        isCredit: item.isCredit.toString() == '1',
-                        headPhoto: item.headPhoto,
-                        level: item.level,
-                        careType: item.careType,
-                        nickName: item.nickname,
-                        desc: item.desc,
-                        score: "${item.scoreComment}",
-                        price: "${item.price}",
-                        service: "${item.service}",
-                        showCancel: false,
-                      ),
+//                      child: CellYuesao(
+//                        type: JJRoleType.nurse,
+//                        isCredit: item.isCredit.toString() == '1',
+//                        headPhoto: item.headPhoto,
+//                        level: item.level,
+//                        careType: item.careType,
+//                        nickName: item.nickname,
+//                        desc: item.desc,
+//                        score: "${item.scoreComment}",
+//                        price: "${item.price}",
+//                        service: "${item.service}",
+//                        showCancel: false,
+//                      ),
                       onTapUp: (TapUpDetails detail) => this.ysItemDidTap(item),
                     ),
                   );
                 },
               )),
+          /*
           showFilter
               ? Positioned(
                   top: AdaptUI.rpx(120),
@@ -553,6 +566,8 @@ class _YuyingListPageState extends State<YuyingListPage>
               }).toList()),
             ),
           ),
+
+           */
         ],
       ),
     );

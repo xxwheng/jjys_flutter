@@ -39,7 +39,6 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
       var articleList = (res['data'] as List)
           ?.map((e) => e == null ? null : ArticleBean.fromJson(e))
           ?.toList();
-      print(res);
       var page = int.parse(res['page'].toString());
       var total = int.parse(res['total'].toString());
       addList(articleList, page, total, setState);

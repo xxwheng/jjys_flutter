@@ -47,9 +47,7 @@ class XXNetwork {
 
     Completer completer = Completer();
 
-    print("请求参数： ${params.toString()}");
     HttpUtil().post(path, params: params, resolve: (res) {
-      print("返回数据： $res");
       if (res["code"] == 0) {
         completer.complete(res["data"]);
       } else if (res["code"] == 10003) {
@@ -89,9 +87,7 @@ class XXNetwork {
     });
 
     Completer completer = Completer();
-    print("请求参数： ${params.toString()}");
     HttpUtil().post(path, data: data, params: params, resolve: (res) {
-      print("返回数据： $res");
       if (res["code"] == 0) {
         completer.complete(res["data"]);
       } else if (res["code"] == 10003) {

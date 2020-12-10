@@ -76,7 +76,6 @@ class _TCaptchaWebWidgetState extends State<TCaptchaWebWidget> {
                   JavascriptChannel(
                     name: "loadAction",
                     onMessageReceived: (JavascriptMessage message) {
-                      print(message);
                       TCSDKView sdkView = TCSDKView.fromMessage(message.message);
 
                       print("width: ${sdkView.width} height: ${sdkView.height}");
@@ -89,7 +88,6 @@ class _TCaptchaWebWidgetState extends State<TCaptchaWebWidget> {
                   JavascriptChannel(
                     name: "verifiedAction",
                     onMessageReceived: (JavascriptMessage message) {
-                      print(message);
                       TCVerifyBean bean = TCVerifyBean.fromMessage(message.message);
                       if (bean.ret == 0) {// 成功
                         widget.successCallback(bean.ticket, bean.randstr);
@@ -102,7 +100,6 @@ class _TCaptchaWebWidgetState extends State<TCaptchaWebWidget> {
                   JavascriptChannel(
                     name: "errorAction",
                     onMessageReceived: (JavascriptMessage message) {
-                      print(message);
                       widget.errorCallback();
                       widget.dismissCallback();
                     },
