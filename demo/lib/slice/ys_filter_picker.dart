@@ -4,63 +4,62 @@ import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
 import 'package:flutter/material.dart';
 
+
+class YsFilterSlice {
+  static Widget pickerText(String text, [String place]) {
+    text ??= '';
+    place ??= '';
+    return Text(text.isEmpty?place:text, style: TextStyle(fontSize: AdaptUI.rpx(30), color: text.isEmpty?UIColor.hex999:UIColor.hex333),);
+  }
+}
+
 /* 月嫂列表筛选 选择栏 */
-// ignore: must_be_immutable
-class YsFilterPickerRowWidget extends StatelessWidget {
+class YsFilterPickerRowWidget extends StatefulWidget {
+  final double height;
 
-  double height = AdaptUI.rpx(80);
+  final Color rowColor = Colors.white;
 
-  Color rowColor = Colors.white;
+  final String title;
 
-  String title;
+  final Widget child;
 
-  String hintText;
+  final GestureTapUpCallback tapAction;
 
-  String content;
+  YsFilterPickerRowWidget({Key key, this.height, this.title, this.child, this.tapAction}): super(key: key);
 
-  GestureTapUpCallback tapAction;
 
-  YsFilterPickerRowWidget({Key key, this.height, this.title, this.hintText, this.content, this.tapAction}): super(key: key);
+  @override
+  _YsFilterPickerRowWidgetState createState() => _YsFilterPickerRowWidgetState();
+}
+
+class _YsFilterPickerRowWidgetState extends State<YsFilterPickerRowWidget> {
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
-      height: height,
-
+      height: widget.height ?? AdaptUI.rpx(80),
       decoration: BoxDecoration(
-        color: rowColor,
+        color: widget.rowColor,
           border: Border(
               bottom: BorderSide(
                   color: UIColor.hexEEE, width: 0.5))),
       child: GestureDetector(
-        onTapUp: tapAction,
+        onTapUp: widget.tapAction,
         child: Container(
           padding: EdgeInsets.only(right: AdaptUI.rpx(30)),
-
           child: Row(
             children: [
               Container(
                 width: AdaptUI.rpx(150),
                 child: Text(
-                  title,
+                  widget.title,
                   style: TextStyle(fontSize: AdaptUI.rpx(30)),
                 ),
               ),
               Expanded(
-
-                  child: TextField(
-                    textAlignVertical: TextAlignVertical.bottom,
-                    controller: TextEditingController(text: content),
-                    readOnly: true,
-                    enabled: false,
-                    enableInteractiveSelection: false,
-                    decoration: InputDecoration(
-      labelStyle: TextStyle(fontSize: AdaptUI.rpx(30)),
-                        border: OutlineInputBorder(borderSide: BorderSide.none),
-                        hintText: hintText,
-                    hintStyle: TextStyle(fontSize: AdaptUI.rpx(30))),
-                  )),
+                  child: widget.child
+              ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: Colors.grey,

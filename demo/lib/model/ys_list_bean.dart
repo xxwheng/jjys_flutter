@@ -6,6 +6,10 @@ part 'ys_list_bean.g.dart';
 
 /* 月嫂列表 */
 
+YsListBean jsonParseCompute(json) {
+  return YsListBean.fromJson(json);
+}
+
 @JsonSerializable()
 class YsListBean extends Object {
 

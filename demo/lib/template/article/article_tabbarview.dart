@@ -54,14 +54,16 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
       color: Colors.white,
       child: PageRefreshWidget(
         pageDataSource: this,
-        itemBuilder: (context, index) {
+        child: ListView.builder(
+            itemCount: list.length,
+            itemBuilder: (context, index) {
           ArticleBean item = list[index];
           return ArticleWidget(
             imageUrl: item.image,
             title: item.title,
             desc: item.desc,
           );
-        },
+        }),
       ),
     );
   }

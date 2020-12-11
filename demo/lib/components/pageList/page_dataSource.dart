@@ -56,7 +56,6 @@ class PageDataSource<T> implements PageInterface {
 
     this.list = tempList;
     endRefreshing();
-    setState((){});
   }
 
 

@@ -78,6 +78,8 @@ class _MyCouponTableViewState extends State<MyCouponTableView>
   Widget build(BuildContext context) {
     return PageRefreshWidget(
         pageDataSource: this,
+        child: ListView.builder(
+        itemCount: list.length,
         itemBuilder: (context, index) {
           MyCouponBean bean = this.list[index];
           return Container(
@@ -172,6 +174,6 @@ class _MyCouponTableViewState extends State<MyCouponTableView>
               ],
             ) 
           );
-        });
+        }));
   }
 }

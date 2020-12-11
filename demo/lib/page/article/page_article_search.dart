@@ -118,7 +118,9 @@ class _PageArticleSearchState extends State<PageArticleSearch> with PageDataSour
         color: Colors.white,
         child: PageRefreshWidget(
           pageDataSource: this,
-          itemBuilder: (context, index) {
+          child: ListView.builder(
+    itemCount: list.length,
+    itemBuilder: (context, index) {
             ArticleBean item = list[index];
             return ArticleWidget(
               imageUrl: item.image,
@@ -128,6 +130,6 @@ class _PageArticleSearchState extends State<PageArticleSearch> with PageDataSour
           },
         ),
       ),
-    );
+    ));
   }
 }

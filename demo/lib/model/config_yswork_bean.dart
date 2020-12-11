@@ -5,6 +5,10 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'config_yswork_bean.g.dart';
 
+ConfigYsWorkBean parseConfigCompute(dynamic value) {
+  return ConfigYsWorkBean.fromJson(value);
+}
+
 @JsonSerializable()
 class ConfigYsWorkBean {
 

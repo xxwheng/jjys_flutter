@@ -15,6 +15,7 @@ class SinglePicker {
   var selectedIndex = 0;
 
   void show() {
+
     showCupertinoModalPopup(
         context: context,
         builder: (context) {
@@ -80,12 +81,15 @@ class SinglePicker {
                           onSelectedItemChanged: (index) {
                             this.selectedIndex = index;
                           },
-                          children: list?.map((title) {
+                          children:
+                          list?.map((title) {
                                 return Center(
                                   child: Text(title),
                                 );
                               })?.toList() ??
-                              []))
+                              []
+          )
+          )
                 ],
               ));
         });

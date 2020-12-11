@@ -1,6 +1,12 @@
 import 'package:demo/model/xx_id_title.dart';
 
 /* 月嫂详情 */
+
+
+YsDetailBean ysDetailCompute(json) {
+  return YsDetailBean.fromJson(json);
+}
+
 class YsDetailBean {
 
   var corpInfo;

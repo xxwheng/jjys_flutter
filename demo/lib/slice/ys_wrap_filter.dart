@@ -1,4 +1,5 @@
 import 'package:adaptui/adaptui.dart';
+import 'package:demo/utils/bus/data_bus.dart';
 import 'package:flutter/material.dart';
 
 /* 多行 单项 筛选 */
@@ -22,15 +23,14 @@ class YsWrapFilterWidget extends StatefulWidget {
   _YsWrapFilterWidgetState createState() => _YsWrapFilterWidgetState();
 }
 
-class _YsWrapFilterWidgetState extends State<YsWrapFilterWidget> {
-  var selectedIndex = 0;
+class _YsWrapFilterWidgetState extends State<YsWrapFilterWidget> with MultiDataLine {
+
+  final String keyIndex = "keyIndex";
 
   // 单项点击
   void itemDidTap(int index) {
-    setState(() {
-      selectedIndex = index;
-    });
-    widget.itemChanged(selectedIndex);
+    getLine<int>(keyIndex).setData(index);
+    widget.itemChanged(index);
   }
 
   @override
@@ -41,13 +41,14 @@ class _YsWrapFilterWidgetState extends State<YsWrapFilterWidget> {
             onTapUp: (tap) {
               itemDidTap(index);
             },
-            child: Container(
+            child: getLine<int>(keyIndex, initValue: 0).addObserver((context, data) => Container(
               width: widget.iwidth,
               height: widget.iheight,
               margin: widget.margin,
-              decoration: widget.decoration(index, selectedIndex),
-              child: Center(child: Text(widget.list[index].toString(), style: TextStyle(fontSize: AdaptUI.rpx(28), color: index == selectedIndex ? Colors.white : widget.textColor),)),
-            ));
+              decoration: widget.decoration(index, data),
+              child: Center(child: Text(widget.list[index].toString(), style: TextStyle(fontSize: AdaptUI.rpx(28), color: index == data ? Colors.white : widget.textColor),)),
+            ))
+        );
       })?.toList() ?? [],
     );
   }

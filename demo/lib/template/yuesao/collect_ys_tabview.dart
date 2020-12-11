@@ -84,7 +84,9 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
   Widget build(BuildContext context) {
     return PageRefreshWidget(
       pageDataSource: this,
-      itemBuilder: (context, index) {
+      child: ListView.builder(
+        itemCount: list.length,
+        itemBuilder: (context, index) {
         UserCollectYsInfoBean item = list[index].info;
         return Container(
           padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
@@ -113,7 +115,7 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
             onTapUp: (TapUpDetails detail) => _gotoDetails(list[index]),
           ),
         );
-      },
+      }),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptui/adaptui.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/common/color.dart';
@@ -15,6 +17,7 @@ import 'package:demo/slice/ys_detail_skill.dart';
 import 'package:demo/slice/ys_name_auth.dart';
 import 'package:demo/utils/bus/data_bus.dart';
 import 'package:demo/utils/ys_level.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class YsDetailPage extends StatefulWidget {
@@ -39,8 +42,6 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    loadYsDetailInfo();
   }
 
   @override
@@ -51,16 +52,25 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
   }
 
   /* 月嫂详情 */
-  void loadYsDetailInfo() async {
-    XXNetwork.shared.post(params: {
+  Future<bool> loadYsDetailInfo() async {
+    return XXNetwork.shared.post(params: {
       "methodName": "YuesaoView",
       "yuesao_id": widget.id
     }).then((value) {
-      YsDetailBean ysBean = YsDetailBean.fromJson(value);
-      getLine<YsDetailBean>(keyInfo).setData(ysBean);
+//      this._ysBean = YsDetailBean.fromJson(value);
       this.loadShowList();
-    });
+      logger.i("详情完成");
+      return ysDetailParse(value);
+    }).then((_) {
+      return true;
+    }).catchError((err)=> false);
   }
+
+  void ysDetailParse(dynamic res) async {
+    this._ysBean = await compute(ysDetailCompute, res);
+    logger.i("解析完成");
+  }
+
 
   /* 工作风采 */
   void loadShowList() async {
@@ -104,96 +114,103 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Container(
-        child: ListView(
-          children: [
-            getLine<YsDetailBean>(keyInfo).addObserver(
-              (context, data) => Column(
+      body: FutureBuilder<bool>(
+        future: loadYsDetailInfo(),
+        builder: (ctx, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            logger.i("刷新。。。${snapshot.data}");
+            return Container(
+              child: ListView(
                 children: [
-                  YsDetailHeader(
-                    nickName: data.profile.nickname,
-                    headPhoto: data.profile.image,
-                    levelText: YsLevel.getYuesaoLevel(data.profile.level),
-                    isCredit: data.profile.credit == "1",
-                    provinceAgeText:
-                        "${data.profile.provinceText} ${data.profile.age}岁",
-                    price: "￥${data.profile.price}",
-                    service: "/${data.profile.service}天",
+                  Column(
+                      children: [
+                        YsDetailHeader(
+                          nickName: _ysBean.profile.nickname,
+                          headPhoto: _ysBean.profile.image,
+                          levelText: YsLevel.getYuesaoLevel(_ysBean.profile.level),
+                          isCredit: _ysBean.profile.credit == "1",
+                          provinceAgeText:
+                          "${_ysBean.profile.provinceText} ${_ysBean.profile.age}岁",
+                          price: "￥${_ysBean.profile.price}",
+                          service: "/${_ysBean.profile.service}天",
+                        ),
+                        YsDetailSkillWidget(
+                          score: _ysBean.profile.commentScore,
+                          experience: _ysBean.credit.experience,
+                          services: _ysBean.credit.services,
+                          duration: _ysBean.credit.duration,
+                        ),
+                        YsDetailCertChartWidget(
+                          certTitles:
+                          _ysBean.credit.certificate.map((e) => e.title).toList(),
+                          introduce: _ysBean.profile.introduce,
+                          label: _ysBean.profile.label,
+                          charts: _ysBean.credit.charts,
+                        ),
+                      ],
+
                   ),
-                  YsDetailSkillWidget(
-                    score: data.profile.commentScore,
-                    experience: data.credit.experience,
-                    services: data.credit.services,
-                    duration: data.credit.duration,
-                  ),
-                  YsDetailCertChartWidget(
-                    certTitles:
-                        data.credit.certificate.map((e) => e.title).toList(),
-                    introduce: data.profile.introduce,
-                    label: data.profile.label,
-                    charts: data.credit.charts,
-                  ),
-                ],
-              ),
-            ),
-            getLine<List<String>>(keyShow).addObserver(
-              (context, data) => Container(
-                margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
-                padding: EdgeInsets.all(AdaptUI.rpx(30)),
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        logger.i("hee");
-                      },
-                      child: Row(
+                   Container(
+                      margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
+                      padding: EdgeInsets.all(AdaptUI.rpx(30)),
+                      color: Colors.white,
+                      child: Column(
                         children: [
-                          Expanded(
-                            child: Text(
-                              "工作风采",
-                              style: TextStyle(fontSize: AdaptUI.rpx(32)),
+                          GestureDetector(
+                            onTap: () {
+                              logger.i("hee");
+                            },
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "工作风采",
+                                    style: TextStyle(fontSize: AdaptUI.rpx(32)),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: AdaptUI.rpx(30),
+                                  color: UIColor.hex999,
+                                )
+                              ],
                             ),
                           ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: AdaptUI.rpx(30),
-                            color: UIColor.hex999,
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: showList
+                                .map((e) => CachedNetworkImage(
+                              imageUrl: e,
+                              width: AdaptUI.rpx(218),
+                              height: AdaptUI.rpx(218),
+                              fit: BoxFit.cover,
+                            ))
+                                .toList(),
                           )
                         ],
                       ),
-                    ),
-                    Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: showList
-                          .map((e) => CachedNetworkImage(
-                                imageUrl: e,
-                                width: AdaptUI.rpx(218),
-                                height: AdaptUI.rpx(218),
-                                fit: BoxFit.cover,
-                              ))
-                          .toList(),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            getLine(keyInfo).addObserver(
-              (context, _) => Column(
-                children: [
-                  YsDetailScheduleWidget(),
-                  YsDetailServiceWidget(
-                    type: JJRoleType.matron,
-                    onMoreTap: () {},
+
                   ),
-                  YsDetailScoreWidget()
+                  Column(
+                      children: [
+                        YsDetailScheduleWidget(),
+                        YsDetailServiceWidget(
+                          type: JJRoleType.matron,
+                          onMoreTap: () {},
+                        ),
+                        YsDetailScoreWidget()
+                      ],
+                    ),
+
                 ],
               ),
-            )
-          ],
-        ),
-      ),
+            );
+          } else {
+            return Row();
+          }
+        },
+      ) ,
     );
   }
 }

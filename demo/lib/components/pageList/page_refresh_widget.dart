@@ -9,9 +9,9 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class PageRefreshWidget<T> extends StatelessWidget {
 
   final PageDataSource<T> pageDataSource;
-  final IndexedWidgetBuilder itemBuilder;
+  final Widget child;
 
-  PageRefreshWidget({Key key, @required this.pageDataSource, @required this.itemBuilder}): super(key: key);
+  PageRefreshWidget({Key key, @required this.pageDataSource, this.child}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,8 @@ class PageRefreshWidget<T> extends StatelessWidget {
       enablePullUp:pageDataSource.enablePullUp,
       controller: pageDataSource.refreshController,
       onRefresh: pageDataSource.onRefresh,
-      header: BezierCircleHeader(),
+      onLoading: pageDataSource.onLoadMore,
+      header: WaterDropHeader(),
       footer: CustomFooter(
         builder: (context, mode) {
           Widget body;
@@ -49,10 +50,7 @@ class PageRefreshWidget<T> extends StatelessWidget {
           );
         },
       ),
-      child: ListView.builder(
-        itemCount: pageDataSource.list.length,
-        itemBuilder: itemBuilder,
-      ),
+      child: child
     );
   }
 }

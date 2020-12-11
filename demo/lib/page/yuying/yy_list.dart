@@ -149,7 +149,6 @@ class _YuyingListPageState extends State<YuyingListPage>
 
   /* 导航按钮点击 */
   void navItemDidTap(int index) {
-    print("${this.navIndex}  $index");
     if (this.navIndex == index) {
       if (index < this.navArray.length - 1 && index > 0) {
         this.navArray[index]["desc"] =
@@ -301,7 +300,9 @@ class _YuyingListPageState extends State<YuyingListPage>
               bottom: 0,
               child: PageRefreshWidget(
                 pageDataSource: this,
-                itemBuilder: (context, index) {
+                child: ListView.builder (
+                  itemCount: list.length,
+                  itemBuilder: (ctx, index) {
                   YsItemBean item = list[index];
                   return Container(
                     padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
@@ -314,24 +315,24 @@ class _YuyingListPageState extends State<YuyingListPage>
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
                     child: GestureDetector(
-//                      child: CellYuesao(
-//                        type: JJRoleType.nurse,
-//                        isCredit: item.isCredit.toString() == '1',
-//                        headPhoto: item.headPhoto,
-//                        level: item.level,
-//                        careType: item.careType,
-//                        nickName: item.nickname,
-//                        desc: item.desc,
-//                        score: "${item.scoreComment}",
-//                        price: "${item.price}",
-//                        service: "${item.service}",
-//                        showCancel: false,
-//                      ),
+                      child: CellYuesao(
+                        type: JJRoleType.nurse,
+                        isCredit: item.isCredit.toString() == '1',
+                        headPhoto: item.headPhoto,
+                        level: item.level,
+                        careType: item.careType,
+                        nickName: item.nickname,
+                        desc: item.desc,
+                        score: "${item.scoreComment}",
+                        price: "${item.price}",
+                        service: "${item.service}",
+                        showCancel: false,
+                      ),
                       onTapUp: (TapUpDetails detail) => this.ysItemDidTap(item),
                     ),
                   );
-                },
-              )),
+                })),
+                )
           /*
           showFilter
               ? Positioned(

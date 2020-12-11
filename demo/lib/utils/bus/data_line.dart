@@ -6,21 +6,30 @@ import 'package:rxdart/rxdart.dart';
 class SingleDataLine<T> {
   StreamController<T> _stream;
 
+  StreamController<T> ss;
+
   T currentData;
 
   SingleDataLine([T initData]) {
     currentData = initData;
     _stream = initData ==  null ? BehaviorSubject<T>() : BehaviorSubject<T>.seeded(initData);
+    ss = _stream;
   }
 
   Stream<T> get outer => _stream.stream;
 
+  bool get isClosed => _stream.isClosed;
+
   StreamSink<T> get inner => _stream.sink;
 
   void setData(T t) {
-    if (t == currentData) return;
+    if (t == currentData) {
+      return;
+    }
 
-    if (_stream.isClosed) return;
+    if (_stream.isClosed) {
+      return;
+    }
 
     currentData = t;
 
