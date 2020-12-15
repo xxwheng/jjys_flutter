@@ -51,7 +51,7 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
           ?.toList();
       var page = int.parse(res['page'].toString());
       var total = int.parse(res['total'].toString());
-      addList(collectList, page, total, setState);
+      addList(collectList, page, total);
     }).catchError((err) {
       this.endRefreshing(status: false);
     }).whenComplete(() {});

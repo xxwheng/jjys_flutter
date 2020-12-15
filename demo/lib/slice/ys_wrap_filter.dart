@@ -41,7 +41,7 @@ class _YsWrapFilterWidgetState extends State<YsWrapFilterWidget> with MultiDataL
             onTapUp: (tap) {
               itemDidTap(index);
             },
-            child: getLine<int>(keyIndex, initValue: 0).addObserver((context, data) => Container(
+            child: getLine<int>(keyIndex, initValue: 0).addObserver(builder: (context, data, _) => Container(
               width: widget.iwidth,
               height: widget.iheight,
               margin: widget.margin,

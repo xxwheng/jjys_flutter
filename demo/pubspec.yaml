@@ -69,7 +69,8 @@ dependencies:
   flutter_native_image: ^0.0.5
   # loading
   flutter_spinkit: ^4.1.2
-
+  # 图片浏览
+  photo_view: ^0.10.3
 
 dev_dependencies:
   flutter_test:

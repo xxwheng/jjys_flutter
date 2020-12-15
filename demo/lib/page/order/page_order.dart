@@ -1,3 +1,5 @@
+import 'package:demo/components/empty/error_page.dart';
+import 'package:demo/components/empty/loading_page.dart';
 import 'package:demo/data/corp_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +22,7 @@ class _PageOrderState extends State<PageOrder> {
         centerTitle: true,
         elevation: 0,
       ),
+      body: ErrorPage(),
     );
   }
 }

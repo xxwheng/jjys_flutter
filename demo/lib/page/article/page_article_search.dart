@@ -51,7 +51,7 @@ class _PageArticleSearchState extends State<PageArticleSearch> with PageDataSour
         total = int.parse(res['total'].toString());
       }
 
-      addList(articleList, page, total, setState);
+      addList(articleList, page, total);
     }).catchError((err) {
       this.endRefreshing(status: false);
     });

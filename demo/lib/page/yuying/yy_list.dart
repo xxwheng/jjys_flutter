@@ -196,7 +196,7 @@ class _YuyingListPageState extends State<YuyingListPage>
       var ysList = YsListBean.fromJson(res);
       var page = int.parse(ysList.page.toString());
       var total = int.parse(ysList.total.toString());
-      addList(ysList.data, page, total, setState);
+      addList(ysList.data, page, total);
     }).catchError((err) {
       this.endRefreshing(status: false);
     }).whenComplete(() {});

@@ -73,7 +73,7 @@ class _YsWrapMultiFilterWidgetState extends State<YsWrapMultiFilterWidget>
                   itemDidTap(index);
                 },
                 child: getLine<List<int>>("multi", initValue: selectedArr)
-                    .addObserver((context, data) => Container(
+                    .addObserver(builder: (context, data, _) => Container(
                           width: widget.iwidth,
                           height: widget.iheight,
                           margin: widget.margin,

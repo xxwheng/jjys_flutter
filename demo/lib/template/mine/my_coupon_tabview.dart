@@ -63,14 +63,14 @@ class _MyCouponTableViewState extends State<MyCouponTableView>
           ?.toList();
       var page = int.parse(value['page'].toString());
       var total = int.parse(value['total'].toString());
-      addList(tempList, page, total, setState);
+      addList(tempList, page, total);
     }).catchError((e) => this.endRefreshing(status: false));
   }
 
   @override
-  void addList(List list, int page, int total, Function setState) {
+  void addList(List list, int page, int total) {
     // TODO: implement addList
-    super.addList(list, page, total, setState);
+    super.addList(list, page, total);
   }
 
   @override

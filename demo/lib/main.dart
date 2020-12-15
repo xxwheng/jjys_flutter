@@ -29,7 +29,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Material App',
       theme: ThemeData(primaryColor: UIColor.mainColor),
-      debugShowCheckedModeBanner: false,
+      /// debug标识
+      debugShowCheckedModeBanner: true,
+      /// 网格调试
+//      debugShowMaterialGrid: true,
+      /// 性能检测
+      showPerformanceOverlay: true,
       onGenerateRoute: App.router.generator,
       builder: (context, child) {
         return Scaffold(

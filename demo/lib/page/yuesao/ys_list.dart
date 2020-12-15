@@ -9,6 +9,7 @@ import 'package:demo/model/ys_item_bean.dart';
 import 'package:demo/model/ys_list_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
+import 'package:demo/page/root/base_page_interface.dart';
 import 'package:demo/slice/ys_filter_picker.dart';
 import 'package:demo/slice/ys_wrap_filter.dart';
 import 'package:demo/slice/ys_wrap_multi_filter.dart';
@@ -33,8 +34,8 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     with
         PageDataSource<YsItemBean>,
         SingleTickerProviderStateMixin,
-        MultiDataLine {
-
+        MultiDataLine
+         {
   final String keyList = "key_list";
 
   int navIndex = 0;
@@ -186,7 +187,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     YsListBean ysList = await compute(jsonParseCompute, res);
     var page = int.parse(ysList.page.toString());
     var total = int.parse(ysList.total.toString());
-    addList(ysList.data, page, total, setState);
+    addList(ysList.data, page, total);
     getLine<int>(keyList).setData(DateTime.now().millisecondsSinceEpoch);
   }
 
@@ -213,7 +214,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text("找月嫂"),
@@ -229,7 +229,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
           child: getLine<List<Map<String, String>>>("navArray",
                   initValue: this.navArray)
               .addObserver(
-            (context, dataArray) => Row(
+            builder: (context, dataArray, _) => Row(
                 children: dataArray.asMap().keys.map((index) {
               return Expanded(
                 child: InkWell(
@@ -237,7 +237,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                       height: AdaptUI.rpx(120),
                       child: getLine<int>("tabIndex", initValue: this.navIndex)
                           .addObserver(
-                        (_, tabIndex) => Row(
+                        builder: (_, tabIndex, __) => Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -260,8 +260,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
           ),
         ),
         Expanded(
-          child:
-              getLine<int>(keyList).addObserver((context, _) {
+          child: getLine<int>(keyList).addObserver(builder: (context, _, __) {
             return PageRefreshWidget(
               pageDataSource: this,
               child: ListView.builder(
@@ -365,7 +364,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                     title: "预约时间",
                     child:
                         getLine<String>(keyPreDay, initValue: this.predictDay)
-                            .addObserver((context, data) {
+                            .addObserver(builder: (context, data, _) {
                       return YsFilterSlice.pickerText(data, "请选择预约时间");
                     }),
                     tapAction: (tap) {
@@ -378,7 +377,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                   height: AdaptUI.rpx(100),
                   title: "服务天数",
                   child: getLine<String>(keyDayBuy, initValue: this.dayBuy)
-                      .addObserver((context, data) =>
+                      .addObserver(builder: (context, data, _) =>
                           YsFilterSlice.pickerText(data, "请选择服务天数")),
                   tapAction: (tap) {
                     SinglePicker(
@@ -389,8 +388,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                         itemChanged: (index) {
                           this.dayBuy =
                               configBean.serviceDayArr[index].toString();
-                          logger.i(
-                              "刷新${this.dayBuy} ${getLine<String>(keyDayBuy).currentData}");
+
                           getLine<String>(keyDayBuy).setData(this.dayBuy);
                         }).show();
                   },
@@ -476,7 +474,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                   height: AdaptUI.rpx(100),
                   title: "籍贯",
                   child: getLine<String>(keyRegion, initValue: "").addObserver(
-                      (context, data) =>
+                      builder: (context, data, _) =>
                           YsFilterSlice.pickerText(data, "请选择籍贯")),
                   tapAction: (tap) => SinglePicker(
                       context: this.context,

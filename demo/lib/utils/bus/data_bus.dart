@@ -12,7 +12,7 @@ mixin MultiDataLine {
     } else if (dataBus[key].isClosed) {
       /// 如果map中有dataline,但是dataline中的streambe已经被关闭(节点被移除)，
       /// 则 重新创建
-      T origin = dataBus[key].currentData;
+      T origin = dataBus[key].model.data;
       SingleDataLine<T> dataLine = SingleDataLine<T>(origin);
       dataBus[key] = dataLine;
     }

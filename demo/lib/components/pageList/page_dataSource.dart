@@ -36,7 +36,7 @@ class PageDataSource<T> implements PageInterface {
     // TODO: implement _loadPageData
   }
 
-  void addList(List<T> list, int page, int total, Function setState) {
+  void addList(List<T> list, int page, int total) {
 
     var tempList = this.list;
     if (this.page == 1) {
@@ -87,6 +87,5 @@ class PageDataSource<T> implements PageInterface {
         refreshController.loadFailed();
       }
     }
-
   }
 }
