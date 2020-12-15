@@ -9,6 +9,7 @@ import 'package:demo/components/empty/empty.dart';
 import 'package:demo/data/bean_compute.dart';
 import 'package:demo/data/global_data.dart';
 import 'package:demo/data/web_url_bridge.dart';
+import 'package:demo/model/ys_comment_list.dart';
 import 'package:demo/model/ys_detail_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
@@ -124,6 +125,8 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
       "page": 1,
       "size": 10,
       "role": 1,
+    }).then((res) {
+      return parseYsCommentListCompute(res);
     }).then((value) {});
   }
 
@@ -133,75 +136,100 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("月嫂详情"),
-          elevation: 0,
-          centerTitle: true,
-        ),
-        body: getLine<YsDetailBean>(keyInfo).addObserver(
-            child: workShowList(),
-            builder: (context, data, _workShow) {
-              logger.i("构建build");
-              return Container(
-                child: ListView(
+      appBar: AppBar(
+        title: Text("月嫂详情"),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: getLine<YsDetailBean>(keyInfo).addObserver(
+        onRefresh: onRefresh,
+        child: workShowList(),
+        builder: (context, data, _workShow) {
+          logger.i("构建build");
+          return Container(
+            child: ListView(
+              children: [
+                Column(
                   children: [
-                    Column(
-                      children: [
-                        YsDetailHeader(
-                          nickName: _ysBean.profile.nickname,
-                          headPhoto: _ysBean.profile.image,
-                          levelText:
-                              YsLevel.getYuesaoLevel(_ysBean.profile.level),
-                          isCredit: _ysBean.profile.credit == "1",
-                          provinceAgeText:
-                              "${_ysBean.profile.provinceText} ${_ysBean.profile.age}岁",
-                          price: "￥${_ysBean.profile.price}",
-                          service: "/${_ysBean.profile.service}天",
-                        ),
-                        YsDetailSkillWidget(
-                          score: _ysBean.profile.commentScore,
-                          experience: _ysBean.credit.experience,
-                          services: _ysBean.credit.services,
-                          duration: _ysBean.credit.duration,
-                          authInfoRowTap: this._gotoAuthInfoWebPage,
-                        ),
-                        YsDetailCertChartWidget(
-                          certTitles: _ysBean.credit.certificate
-                              .map((e) => e.title)
-                              .toList(),
-                          introduce: _ysBean.profile.introduce,
-                          label: _ysBean.profile.label,
-                          charts: _ysBean.credit.charts,
-                        ),
-                      ],
+                    YsDetailHeader(
+                      nickName: _ysBean.profile.nickname,
+                      headPhoto: _ysBean.profile.image,
+                      levelText: YsLevel.getYuesaoLevel(_ysBean.profile.level),
+                      isCredit: _ysBean.profile.credit == "1",
+                      provinceAgeText:
+                          "${_ysBean.profile.provinceText} ${_ysBean.profile.age}岁",
+                      price: "￥${_ysBean.profile.price}",
+                      service: "/${_ysBean.profile.service}天",
                     ),
-                    _workShow,
-                    Column(
-                      children: [
-                        YsDetailScheduleWidget(),
-                        YsDetailServiceWidget(
-                          type: JJRoleType.matron,
-                          onMoreTap: () {},
-                        ),
-                        YsDetailScoreWidget()
-                      ],
+                    YsDetailSkillWidget(
+                      score: _ysBean.profile.commentScore,
+                      experience: _ysBean.credit.experience,
+                      services: _ysBean.credit.services,
+                      duration: _ysBean.credit.duration,
+                      authInfoRowTap: this._gotoAuthInfoWebPage,
+                    ),
+                    YsDetailCertChartWidget(
+                      certTitles: _ysBean.credit.certificate
+                          .map((e) => e.title)
+                          .toList(),
+                      introduce: _ysBean.profile.introduce,
+                      label: _ysBean.profile.label,
+                      charts: _ysBean.credit.charts,
                     ),
                   ],
                 ),
-              );
-            },
-            onRefresh: onRefresh));
+                _workShow,
+                Column(
+                  children: [
+                    YsDetailScheduleWidget(),
+                    serviceContent(),
+                    YsDetailScoreWidget()
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   /* 点击工作风采 */
   void _workShowDidTap() {
-    App.navigationTo(context, PageRoutes.ysWorkShowPage+"?id=${Uri.encodeComponent(_ysBean.profile.id)}&type=${Uri.encodeComponent(JJRoleType.matron.index.toString())}");
+    App.navigationTo(
+        context,
+        PageRoutes.ysWorkShowPage +
+            "?id=${Uri.encodeComponent(_ysBean.profile.id)}&type=${Uri.encodeComponent(JJRoleType.matron.index.toString())}");
   }
 
-  /* 月嫂认证信息 */
+  /* 点击月嫂认证信息 */
   void _gotoAuthInfoWebPage() async {
-    String url = await WebUrlBridge.urlBridget(kAuthInfoYueSao+_ysBean.profile.id);
-    App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent(_ysBean.profile.nickname)}&url=${Uri.encodeComponent(url)}",);
+    String url =
+        await WebUrlBridge.urlBridget(kAuthInfoYueSao + _ysBean.profile.id);
+    App.navigationTo(
+      context,
+      PageRoutes.singleWebPage +
+          "?title=${Uri.encodeComponent(_ysBean.profile.nickname)}&url=${Uri.encodeComponent(url)}",
+    );
+  }
+
+  /* 点击服务内容 */
+  void _gotoServiceInfo() async {
+    String url = await WebUrlBridge.urlBridget(
+        kYueSaoServiceInfo + _ysBean.profile.level);
+    App.navigationTo(
+      context,
+      PageRoutes.singleWebPage +
+          "?title=${Uri.encodeComponent(_ysBean.profile.nickname)}&url=${Uri.encodeComponent(url)}",
+    );
+  }
+
+  /* 服务内容 */
+  Widget serviceContent() {
+    return YsDetailServiceWidget(
+      type: JJRoleType.matron,
+      onMoreTap: _gotoServiceInfo,
+    );
   }
 
   /// 工作风采
