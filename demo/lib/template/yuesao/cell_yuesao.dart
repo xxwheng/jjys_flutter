@@ -123,7 +123,7 @@ class CellYuesao extends StatelessWidget {
                                           fontSize: AdaptUI.rpx(34),
                                           fontWeight: FontWeight.w500)),
                                   TextSpan(
-                                      text: type == 1 ? "/$service天" : "/月",
+                                      text: type == JJRoleType.matron ? "/$service天" : "/月",
                                       style: TextStyle(
                                           fontSize: AdaptUI.rpx(24),
                                           color: UIColor.hex333)),

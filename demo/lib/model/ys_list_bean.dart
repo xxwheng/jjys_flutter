@@ -2,35 +2,32 @@
 import 'package:demo/model/ys_item_bean.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-part 'ys_list_bean.g.dart';
-
 /* 月嫂列表 */
-
-YsListBean jsonParseCompute(json) {
-  return YsListBean.fromJson(json);
-}
-
-@JsonSerializable()
 class YsListBean extends Object {
 
-  @JsonKey(name: "page")
-  var page;
+  int page;
 
-  @JsonKey(name: "size")
-  var size;
+  int size;
 
-  @JsonKey(name: "total")
-  var total;
+  int total;
 
-  @JsonKey(name: "count")
-  var count;
+  int count;
 
-  @JsonKey(name: "data")
   List<YsItemBean> data;
 
   YsListBean(this.page, this.size, this.total, this.count, this.data);
 
-  factory YsListBean.fromJson(Map<String, dynamic> json) => _$YsListBeanFromJson(json);
+  factory YsListBean.fromJson(Map<String, dynamic> json) {
+    return YsListBean(
+      int.parse(json['page'].toString()) ?? 1,
+      int.parse(json['size'].toString()) ?? 0,
+      int.parse(json['total'].toString()) ?? 0,
+      int.parse(json['count'].toString()) ?? 0,
+      (json['data'] as List)
+          ?.map((e) =>
+      e == null ? null : YsItemBean.fromJson(e as Map<String, dynamic>))
+          ?.toList(),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$YsListBeanToJson(this);
 }

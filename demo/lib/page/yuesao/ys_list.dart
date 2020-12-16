@@ -1,6 +1,8 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/common/common.dart';
+import 'package:demo/data/bean_compute.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/model/config_yswork_bean.dart';
 import 'package:demo/model/level_bean.dart';
 import 'package:demo/model/province_bean.dart';
@@ -17,6 +19,7 @@ import 'package:demo/template/yuesao/cell_yuesao.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/utils/bus/data_bus.dart';
+import 'package:demo/utils/bus/data_line.dart';
 import 'package:demo/utils/single_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -34,9 +37,10 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     with
         PageDataSource<YsItemBean>,
         SingleTickerProviderStateMixin,
-        MultiDataLine
-         {
+        MultiDataLine {
   final String keyList = "key_list";
+  final String keyNav = "key_nav";
+  final String keyIndex = "key_index";
 
   int navIndex = 0;
   List<Map<String, String>> navArray = [
@@ -68,23 +72,13 @@ class _YuesaoListPageState extends State<YuesaoListPage>
   /// 筛选日期
   String predictDay = "";
 
-  final double filterMaxH = AdaptUI.screenHeight -
-      AdaptUI.safeATop -
-      AdaptUI.rpx(120) -
-      AdaptUI.rpx(50);
-  double filterTop;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    filterTop = -filterMaxH;
-
+    getLine<int>(keyList).onLoading();
     initData();
-
-    onRefresh();
-    loadYuesaoConfigWork();
+    onLoad();
   }
 
   void initData() {
@@ -96,6 +90,208 @@ class _YuesaoListPageState extends State<YuesaoListPage>
         .map((e) => YsFilterYearBean(e, titleArr[e]))
         .toList();
     yearBean = yearFilterArray[0];
+  }
+
+  /* 导航按钮点击 */
+  void navItemDidTap(int index) {
+    if (this.navIndex == index) {
+      if (index < this.navArray.length - 1 && index > 0) {
+        this.navArray[index]["desc"] =
+            this.navArray[index]["desc"] == "1" ? "0" : "1";
+        getLine<List<Map<String, String>>>(keyNav).setData([...this.navArray]);
+        this.onRefresh();
+      }
+      return;
+    }
+
+    if (index < this.navArray.length - 1) {
+      this.navIndex = index;
+      getLine<int>(keyIndex).setData(index);
+      this.onRefresh();
+    } else {
+      filterShow();
+    }
+  }
+
+  void onLoad() async {
+    Future.wait([
+      XXNetwork.shared.post(params: {
+        "list_order": "1",
+        "force_desc": "1",
+        "methodName": "YuesaoIndex",
+        "day_buy": '26',
+        "size": "$size",
+        "page": "$page",
+      }),
+      XXNetwork.shared.post(params: {
+        "methodName": "ConfigYuesaoOnwork",
+      })
+    ]).then((value) {
+      return Future.wait(
+          [parseYsListCompute(value[0]), parseYsConfigCompute(value[1])]);
+    }).then((resArr) {
+      ConfigYsWorkBean configBean = resArr[1];
+      this.dayBuy = configBean.serviceDayArr?.first?.toString() ?? "26";
+      this.configBean = configBean;
+
+      YsListBean ysData = resArr[0];
+      addList(ysData.data, ysData.page, ysData.total);
+      Future.delayed(Duration(milliseconds: 100), () {
+        getLine<List<Map<String, String>>>(keyNav).setData(this.navArray);
+        getLine<int>(keyList).setData(DateTime.now().millisecondsSinceEpoch);
+      });
+    }).catchError((err) {
+      getLine<int>(keyList).setState(LineState.failure);
+    });
+  }
+
+  @override
+  void loadPageData() async {
+    // TODO: implement _loadPageData
+    super.loadPageData();
+
+    var timestamp = "";
+    if (null != predictDay && predictDay.isNotEmpty) {
+      var time = DateTime.parse(predictDay);
+      timestamp = (time.millisecondsSinceEpoch ~/ 1000).toString();
+    }
+
+    XXNetwork.shared.post(params: {
+      "list_order": "${this.navIndex < 3 ? this.navIndex + 1 : 1}",
+      "force_desc": "${this.navArray[this.navIndex]["desc"]}",
+      "methodName": "YuesaoIndex",
+      "day_buy": dayBuy,
+      "size": "$size",
+      "page": "$page",
+      "level": "${levelBeanList?.map((e) => e.levelId)?.join(',') ?? 0}",
+      "year": "${yearBean?.year ?? 0}",
+      "region": "${filterProvince?.code ?? 0}",
+      "predict_day": timestamp
+    }).then((res) {
+      return parseYsListCompute(res);
+    }).then((ysData) {
+      addList(ysData.data, ysData.page, ysData.total);
+      getLine<int>(keyList).setData(DateTime.now().millisecondsSinceEpoch);
+    }).catchError((err) {
+      this.endRefreshing(status: false);
+    }).whenComplete(() {});
+  }
+
+  /* 筛选配置 */
+  void loadYuesaoConfigWork() async {
+    XXNetwork.shared.post(params: {
+      "methodName": "ConfigYuesaoOnwork",
+    }).then((value) {
+      return parseYsConfigCompute(value);
+    }).then((config) {
+      this.dayBuy = configBean.serviceDayArr?.first?.toString() ?? "26";
+      this.configBean = configBean;
+    });
+  }
+
+  /* 点击进入育婴师详情 */
+  void ysItemDidTap(YsItemBean item) {
+    App.navigationTo(context, PageRoutes.ysDetailPage + '?id=${item.id}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("找月嫂"),
+        elevation: 0,
+      ),
+      body: Column(children: [
+        Container(
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
+          height: AdaptUI.rpx(120),
+          width: AdaptUI.screenWidth,
+          child: getLine<List<Map<String, String>>>(keyNav).addObserver(
+              builder: (context, dataArray, _) {
+            return Row(
+                children: dataArray
+                    .asMap()
+                    .keys
+                    .map((index) => navItemWidget(index))
+                    .toList());
+          }),
+        ),
+        Expanded(
+          child: getLine<int>(keyList).addObserver(
+              onRefresh: this.onLoad,
+              builder: (context, _, __) => listWidget()),
+        )
+      ]),
+    );
+  }
+
+  ///* 列表 */
+  Widget listWidget() {
+    return PageRefreshWidget(
+      pageDataSource: this,
+      child: ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (ctx, index) {
+            YsItemBean item = list[index];
+            return Container(
+              padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
+              margin: EdgeInsets.only(
+                  left: AdaptUI.rpx(30),
+                  top: AdaptUI.rpx(20),
+                  right: AdaptUI.rpx(30),
+                  bottom: AdaptUI.rpx(0)),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
+              child: GestureDetector(
+                child: CellYuesao(
+                  isCredit: item.isCredit == '1',
+                  headPhoto: item.headPhoto,
+                  level: item.level,
+                  nickName: item.nickname,
+                  desc: item.desc,
+                  score: "${item.scoreComment}",
+                  price: item.price,
+                  service: item.service,
+                  showCancel: false,
+                ),
+                onTapUp: (TapUpDetails detail) => this.ysItemDidTap(item),
+              ),
+            );
+          }),
+    );
+  }
+
+  ///* 头部筛选 */
+  Widget navItemWidget(int index) {
+    return Expanded(
+      child: InkWell(
+        child: Container(
+            height: AdaptUI.rpx(120),
+            child: getLine<int>(keyIndex, initValue: this.navIndex).addObserver(
+              builder: (_, tabIndex, __) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      this.navArray[index]["title"],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: AdaptUI.rpx(32),
+                          color: index == tabIndex
+                              ? UIColor.mainColor
+                              : UIColor.hex333),
+                    ),
+                    afterIcon(index),
+                  ],
+                );
+              },
+            )),
+        onTap: () => this.navItemDidTap(index),
+      ),
+    );
   }
 
   /// 菜单栏 icon
@@ -129,176 +325,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     } else {
       return Icon(Icons.filter_alt_outlined, size: AdaptUI.rpx(28));
     }
-  }
-
-  /* 导航按钮点击 */
-  void navItemDidTap(int index) {
-    if (this.navIndex == index) {
-      if (index < this.navArray.length - 1 && index > 0) {
-        this.navArray[index]["desc"] =
-            this.navArray[index]["desc"] == "1" ? "0" : "1";
-        getLine<List<Map<String, String>>>("navArray")
-            .setData([...this.navArray]);
-        this.onRefresh();
-      }
-      return;
-    }
-
-    if (index < this.navArray.length - 1) {
-      this.navIndex = index;
-      getLine<int>("tabIndex").setData(index);
-      this.onRefresh();
-    } else {
-      filterShow();
-    }
-  }
-
-  @override
-  void loadPageData() async {
-    // TODO: implement _loadPageData
-    super.loadPageData();
-
-    var timestamp = "";
-    if (null != predictDay && predictDay.isNotEmpty) {
-      var time = DateTime.parse(predictDay);
-      timestamp = (time.millisecondsSinceEpoch ~/ 1000).toString();
-    }
-
-    XXNetwork.shared.post(params: {
-      "list_order": "${this.navIndex < 3 ? this.navIndex + 1 : 1}",
-      "force_desc": "${this.navArray[this.navIndex]["desc"]}",
-      "methodName": "YuesaoIndex",
-      "day_buy": dayBuy,
-      "size": "$size",
-      "page": "$page",
-      "level": "${levelBeanList?.map((e) => e.levelId)?.join(',') ?? 0}",
-      "year": "${yearBean?.year ?? 0}",
-      "region": "${filterProvince?.code ?? 0}",
-      "predict_day": timestamp
-    }).then((res) {
-      parseFunc(res);
-    }).catchError((err) {
-      this.endRefreshing(status: false);
-    }).whenComplete(() {});
-  }
-
-  /* 列表 解析 */
-  void parseFunc(dynamic res) async {
-    YsListBean ysList = await compute(jsonParseCompute, res);
-    var page = int.parse(ysList.page.toString());
-    var total = int.parse(ysList.total.toString());
-    addList(ysList.data, page, total);
-    getLine<int>(keyList).setData(DateTime.now().millisecondsSinceEpoch);
-  }
-
-  /* 筛选配置 */
-  void loadYuesaoConfigWork() async {
-    XXNetwork.shared.post(params: {
-      "methodName": "ConfigYuesaoOnwork",
-    }).then((value) {
-      parseConfig(value);
-    });
-  }
-
-  /* 筛选配置 解析 */
-  void parseConfig(dynamic value) async {
-    ConfigYsWorkBean configBean = await compute(parseConfigCompute, value);
-    this.dayBuy = configBean.serviceDayArr?.first?.toString() ?? "26";
-    this.configBean = configBean;
-  }
-
-  /* 点击进入育婴师详情 */
-  void ysItemDidTap(YsItemBean item) {
-    App.navigationTo(context, PageRoutes.ysDetailPage + '?id=${item.id}');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("找月嫂"),
-        elevation: 0,
-      ),
-      body: Column(children: [
-        Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
-          height: AdaptUI.rpx(120),
-          width: AdaptUI.screenWidth,
-          child: getLine<List<Map<String, String>>>("navArray",
-                  initValue: this.navArray)
-              .addObserver(
-            builder: (context, dataArray, _) => Row(
-                children: dataArray.asMap().keys.map((index) {
-              return Expanded(
-                child: InkWell(
-                  child: Container(
-                      height: AdaptUI.rpx(120),
-                      child: getLine<int>("tabIndex", initValue: this.navIndex)
-                          .addObserver(
-                        builder: (_, tabIndex, __) => Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              dataArray[index]["title"],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: AdaptUI.rpx(32),
-                                  color: index == tabIndex
-                                      ? UIColor.mainColor
-                                      : UIColor.hex333),
-                            ),
-                            afterIcon(index),
-                          ],
-                        ),
-                      )),
-                  onTap: () => this.navItemDidTap(index),
-                ),
-              );
-            }).toList()),
-          ),
-        ),
-        Expanded(
-          child: getLine<int>(keyList).addObserver(builder: (context, _, __) {
-            return PageRefreshWidget(
-              pageDataSource: this,
-              child: ListView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (ctx, index) {
-                    YsItemBean item = list[index];
-                    return Container(
-                      padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
-                      margin: EdgeInsets.only(
-                          left: AdaptUI.rpx(30),
-                          top: AdaptUI.rpx(20),
-                          right: AdaptUI.rpx(30),
-                          bottom: AdaptUI.rpx(0)),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
-                      child: GestureDetector(
-                        child: CellYuesao(
-                          isCredit: item.isCredit.toString() == '1',
-                          headPhoto: item.headPhoto,
-                          level: item.level,
-                          nickName: item.nickname,
-                          desc: item.desc,
-                          score: "${item.scoreComment}",
-                          price: "${item.price}",
-                          service: "${item.service}",
-                          showCancel: false,
-                        ),
-                        onTapUp: (TapUpDetails detail) =>
-                            this.ysItemDidTap(item),
-                      ),
-                    );
-                  }),
-            );
-          }),
-        )
-      ]),
-    );
   }
 
   @override
@@ -377,8 +403,9 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                   height: AdaptUI.rpx(100),
                   title: "服务天数",
                   child: getLine<String>(keyDayBuy, initValue: this.dayBuy)
-                      .addObserver(builder: (context, data, _) =>
-                          YsFilterSlice.pickerText(data, "请选择服务天数")),
+                      .addObserver(
+                          builder: (context, data, _) =>
+                              YsFilterSlice.pickerText(data, "请选择服务天数")),
                   tapAction: (tap) {
                     SinglePicker(
                         context: this.context,

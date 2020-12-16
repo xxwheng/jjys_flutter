@@ -29,8 +29,10 @@ class YuyingListPage extends StatefulWidget {
 }
 
 class _YuyingListPageState extends State<YuyingListPage>
-    with PageDataSource<YsItemBean>, SingleTickerProviderStateMixin, MultiDataLine {
-
+    with
+        PageDataSource<YsItemBean>,
+        SingleTickerProviderStateMixin,
+        MultiDataLine {
   final String _keyWork = "workKey";
 
   int navIndex = 0;
@@ -64,21 +66,15 @@ class _YuyingListPageState extends State<YuyingListPage>
   /// 筛选日期
   String predictDay;
 
-  final double filterMaxH = AdaptUI.screenHeight -
-      AdaptUI.safeATop -
-      AdaptUI.rpx(120) -
-      AdaptUI.rpx(50);
-  double filterTop;
+  BuildContext _filterSheetCtx;
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    filterTop = -filterMaxH;
-
     initData();
-
     onRefresh();
     loadYuyingConfigWork();
   }
@@ -161,14 +157,10 @@ class _YuyingListPageState extends State<YuyingListPage>
     if (index < this.navArray.length - 1) {
       this.navIndex = index;
       this.onRefresh();
-      this.filterTapDimiss();
-      setState(() {});
     } else {
-      showFilter ? filterTapDimiss() : filterShow();
+      filterShow();
     }
   }
-
-  
 
   @override
   void loadPageData() async {
@@ -216,10 +208,7 @@ class _YuyingListPageState extends State<YuyingListPage>
 
   // 筛选窗弹出
   void filterShow() {
-    this.filterTop = AdaptUI.rpx(120);
-    setState(() {
-      this.showFilter = true;
-    });
+    showFilterSheet(context);
   }
 
   // 筛选确认
@@ -231,19 +220,17 @@ class _YuyingListPageState extends State<YuyingListPage>
 
   // 筛选窗隐藏
   void filterTapDimiss() {
-    this.filterTop = -filterMaxH;
-    setState(() {
-      this.showFilter = false;
-    });
+    if (_filterSheetCtx != null) {
+      Navigator.of(_filterSheetCtx).pop();
+      _filterSheetCtx = null;
+    }
   }
 
   /* 预约时间筛选 */
   void filterDatePickerDidTap() {
-    DatePicker.showDatePicker(this.context, onConfirm: (date) {
-      var dateStr = date.toString().split(" ").first;
-      setState(() {
-        this.predictDay = dateStr;
-      });
+    DatePicker.showDatePicker(context, onConfirm: (date) {
+      this.predictDay = date.toString().split(" ").first;
+      getLine<String>(keyPreDay).setData(this.predictDay);
     }, currentTime: DateTime.now(), locale: LocaleType.zh);
   }
 
@@ -262,7 +249,7 @@ class _YuyingListPageState extends State<YuyingListPage>
   void filterYearIndexTap(int index) {
     this.yearBean = this.yearFilterArray[index];
   }
-  
+
   /* 籍贯选择 */
   void filterRegionPickerDidTap() {
     SinglePicker(
@@ -271,14 +258,13 @@ class _YuyingListPageState extends State<YuyingListPage>
             .map((e) => e.cityName)
             .toList(),
         itemChanged: (index) {
-          setState(() {
-            this.filterProvince =
-            configBean.provinceYuyingArr[index];
-          });
+          this.filterProvince =
+          configBean.provinceYuyingArr[index];
+          getLine<String>(keyRegion)
+              .setData(this.filterProvince.cityName);
         }).show();
   }
-  
-  
+
   /* 点击进入育婴师详情 */
   void ysItemDidTap(YsItemBean item) {
     App.navigationTo(context, PageRoutes.ysDetailPage);
@@ -294,241 +280,46 @@ class _YuyingListPageState extends State<YuyingListPage>
       body: Stack(
         children: [
           Positioned(
-              top: AdaptUI.rpx(120),
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: PageRefreshWidget(
-                pageDataSource: this,
-                child: ListView.builder (
-                  itemCount: list.length,
-                  itemBuilder: (ctx, index) {
-                  YsItemBean item = list[index];
-                  return Container(
-                    padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
-                    margin: EdgeInsets.only(
-                        left: AdaptUI.rpx(30),
-                        top: AdaptUI.rpx(20),
-                        right: AdaptUI.rpx(30),
-                        bottom: AdaptUI.rpx(0)),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
-                    child: GestureDetector(
-                      child: CellYuesao(
-                        type: JJRoleType.nurse,
-                        isCredit: item.isCredit.toString() == '1',
-                        headPhoto: item.headPhoto,
-                        level: item.level,
-                        careType: item.careType,
-                        nickName: item.nickname,
-                        desc: item.desc,
-                        score: "${item.scoreComment}",
-                        price: "${item.price}",
-                        service: "${item.service}",
-                        showCancel: false,
-                      ),
-                      onTapUp: (TapUpDetails detail) => this.ysItemDidTap(item),
-                    ),
-                  );
-                })),
-                )
-          /*
-          showFilter
-              ? Positioned(
-                  top: AdaptUI.rpx(120),
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    color: Color(0x55000000),
-                  ),
-                )
-              : Container(),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 250),
-            top: filterTop,
+            top: AdaptUI.rpx(120),
             left: 0,
             right: 0,
-            child: Container(
-              child: Column(
-                children: [
-                  YsFilterPickerRowWidget(
-                    height: AdaptUI.rpx(90),
-                    title: "预约时间",
-                    hintText: "请选择预约时间",
-                    content: this.predictDay,
-                    tapAction: (tap) => this.filterDatePickerDidTap(),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(
-                        left: AdaptUI.rpx(30),
-                        top: AdaptUI.rpx(20),
-                        bottom: AdaptUI.rpx(20)),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(
-                            bottom:
-                                BorderSide(color: UIColor.hexEEE, width: 0.5))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("等级"),
-                        YsWrapMultiFilterWidget(
-                          list: this
-                              .configBean
-                              ?.levelYuyingArr
-                              ?.map((e) => e.title)
-                              ?.toList(),
-                          iwidth: AdaptUI.rpx(158),
-                          iheight: AdaptUI.rpx(70),
-                          margin: EdgeInsets.only(
-                              top: AdaptUI.rpx(20), right: AdaptUI.rpx(20)),
-                          textColor: UIColor.mainColor,
-                          indexChanged: this.filterLevelIndexTap,
-                          decorationIndexArr: (currentIndex, indexArr) {
-                            return BoxDecoration(
-                                color: indexArr.contains(currentIndex)
-                                    ? UIColor.mainColor
-                                    : Colors.white,
-                                border: Border.all(
-                                    width: 1, color: UIColor.mainColor));
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(
-                        left: AdaptUI.rpx(30),
-                        top: AdaptUI.rpx(20),
-                        bottom: AdaptUI.rpx(20)),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(
-                            bottom:
-                                BorderSide(color: UIColor.hexEEE, width: 0.5))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("育婴师分类"),
-                        YsWrapFilterWidget(
-                          list: this
-                              .careTypeFilterArray
-                              ?.map((e) => e.title)
-                              ?.toList(),
-                          iwidth: AdaptUI.rpx(158),
-                          iheight: AdaptUI.rpx(70),
-                          margin: EdgeInsets.only(
-                              top: AdaptUI.rpx(20), right: AdaptUI.rpx(20)),
-                          textColor: UIColor.mainColor,
-                          itemChanged: this.filterCareTypeIndexTap,
-                          decoration: (currentIndex, selectedIndex) {
-                            return BoxDecoration(
-                                color: currentIndex == selectedIndex
-                                    ? UIColor.mainColor
-                                    : Colors.white,
-                                border: Border.all(
-                                    width: 1, color: UIColor.mainColor));
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(
-                        left: AdaptUI.rpx(30),
-                        top: AdaptUI.rpx(20),
-                        bottom: AdaptUI.rpx(20)),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(
-                            bottom:
-                                BorderSide(color: UIColor.hexEEE, width: 0.5))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("年龄"),
-                        YsWrapFilterWidget(
-                          list: this
-                              .yearFilterArray
-                              ?.map((e) => e.title)
-                              ?.toList(),
-                          iwidth: AdaptUI.rpx(158),
-                          iheight: AdaptUI.rpx(70),
-                          margin: EdgeInsets.only(
-                              top: AdaptUI.rpx(20), right: AdaptUI.rpx(20)),
-                          textColor: UIColor.mainColor,
-                          itemChanged: this.filterYearIndexTap,
-                          decoration: (currentIndex, selectedIndex) {
-                            return BoxDecoration(
-                                color: currentIndex == selectedIndex
-                                    ? UIColor.mainColor
-                                    : Colors.white,
-                                border: Border.all(
-                                    width: 1, color: UIColor.mainColor));
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-                  YsFilterPickerRowWidget(
-                    height: AdaptUI.rpx(100),
-                    title: "籍贯",
-                    hintText: "请选择籍贯",
-                    content: this.filterProvince?.cityName ?? "",
-                    tapAction: (tap) => this.filterRegionPickerDidTap(),
-                  ),
-                  Container(
-                    height: AdaptUI.rpx(150),
-                    padding: EdgeInsets.only(
-                        left: AdaptUI.rpx(120), right: AdaptUI.rpx(120)),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(8),
-                            bottomRight: Radius.circular(8))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          child: Container(
-                            width: AdaptUI.rpx(220),
-                            height: AdaptUI.rpx(80),
-                            decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 1),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5))),
-                            child: Center(child: Text("取消")),
+            bottom: 0,
+            child: PageRefreshWidget(
+                pageDataSource: this,
+                child: ListView.builder(
+                    itemCount: list.length,
+                    itemBuilder: (ctx, index) {
+                      YsItemBean item = list[index];
+                      return Container(
+                        padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
+                        margin: EdgeInsets.only(
+                            left: AdaptUI.rpx(30),
+                            top: AdaptUI.rpx(20),
+                            right: AdaptUI.rpx(30),
+                            bottom: AdaptUI.rpx(0)),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.circular(AdaptUI.rpx(10))),
+                        child: GestureDetector(
+                          child: CellYuesao(
+                            type: JJRoleType.nurse,
+                            isCredit: item.isCredit.toString() == '1',
+                            headPhoto: item.headPhoto,
+                            level: item.level,
+                            careType: item.careType,
+                            nickName: item.nickname,
+                            desc: item.desc,
+                            score: "${item.scoreComment}",
+                            price: "${item.price}",
+                            service: "${item.service}",
+                            showCancel: false,
                           ),
-                          onTapUp: (tap) => this.filterTapDimiss(),
+                          onTapUp: (TapUpDetails detail) =>
+                              this.ysItemDidTap(item),
                         ),
-                        GestureDetector(
-                          child: Container(
-                            width: AdaptUI.rpx(220),
-                            height: AdaptUI.rpx(80),
-                            decoration: BoxDecoration(
-                                color: UIColor.mainColor,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5))),
-                            child: Center(
-                                child: Text(
-                              "确定",
-                              style: TextStyle(color: Colors.white),
-                            )),
-                          ),
-                          onTapUp: (tap) => this.filterOkDidTap(),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
+                      );
+                    })),
           ),
           // 顶部筛选导航
           Positioned(
@@ -567,10 +358,193 @@ class _YuyingListPageState extends State<YuyingListPage>
               }).toList()),
             ),
           ),
-
-           */
         ],
       ),
     );
+  }
+
+  final String keyPreDay = "key_preDay";
+  final String keyRegion = "key_region";
+
+  /* Sheet */
+  showFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        isDismissible: true,
+        isScrollControlled: true,
+        builder: (BuildContext ctx) {
+          _filterSheetCtx = ctx;
+          return SingleChildScrollView(
+            child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+              YsFilterPickerRowWidget(
+                height: AdaptUI.rpx(90),
+                title: "预约时间",
+                child: getLine<String>(keyPreDay, initValue: this.predictDay)
+                    .addObserver(builder: (context, data, _) {
+                  return YsFilterSlice.pickerText(data, "请选择预约时间");
+                }),
+                tapAction: (tap) => this.filterDatePickerDidTap(),
+              ),
+              Container(
+                padding: EdgeInsets.only(
+                    left: AdaptUI.rpx(30),
+                    top: AdaptUI.rpx(20),
+                    bottom: AdaptUI.rpx(20)),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                        bottom: BorderSide(color: UIColor.hexEEE, width: 0.5))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("等级"),
+                    YsWrapMultiFilterWidget(
+                      list: this
+                          .configBean
+                          ?.levelYuyingArr
+                          ?.map((e) => e.title)
+                          ?.toList(),
+                      iwidth: AdaptUI.rpx(158),
+                      iheight: AdaptUI.rpx(70),
+                      margin: EdgeInsets.only(
+                          top: AdaptUI.rpx(20), right: AdaptUI.rpx(20)),
+                      textColor: UIColor.mainColor,
+                      indexChanged: this.filterLevelIndexTap,
+                      decorationIndexArr: (currentIndex, indexArr) {
+                        return BoxDecoration(
+                            color: indexArr.contains(currentIndex)
+                                ? UIColor.mainColor
+                                : Colors.white,
+                            border:
+                                Border.all(width: 1, color: UIColor.mainColor));
+                      },
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(
+                    left: AdaptUI.rpx(30),
+                    top: AdaptUI.rpx(20),
+                    bottom: AdaptUI.rpx(20)),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                        bottom: BorderSide(color: UIColor.hexEEE, width: 0.5))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("育婴师分类"),
+                    YsWrapFilterWidget(
+                      list: this
+                          .careTypeFilterArray
+                          ?.map((e) => e.title)
+                          ?.toList(),
+                      iwidth: AdaptUI.rpx(158),
+                      iheight: AdaptUI.rpx(70),
+                      margin: EdgeInsets.only(
+                          top: AdaptUI.rpx(20), right: AdaptUI.rpx(20)),
+                      textColor: UIColor.mainColor,
+                      itemChanged: this.filterCareTypeIndexTap,
+                      decoration: (currentIndex, selectedIndex) {
+                        return BoxDecoration(
+                            color: currentIndex == selectedIndex
+                                ? UIColor.mainColor
+                                : Colors.white,
+                            border:
+                                Border.all(width: 1, color: UIColor.mainColor));
+                      },
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(
+                    left: AdaptUI.rpx(30),
+                    top: AdaptUI.rpx(20),
+                    bottom: AdaptUI.rpx(20)),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                        bottom: BorderSide(color: UIColor.hexEEE, width: 0.5))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("年龄"),
+                    YsWrapFilterWidget(
+                      list: this.yearFilterArray?.map((e) => e.title)?.toList(),
+                      iwidth: AdaptUI.rpx(158),
+                      iheight: AdaptUI.rpx(70),
+                      margin: EdgeInsets.only(
+                          top: AdaptUI.rpx(20), right: AdaptUI.rpx(20)),
+                      textColor: UIColor.mainColor,
+                      itemChanged: this.filterYearIndexTap,
+                      decoration: (currentIndex, selectedIndex) {
+                        return BoxDecoration(
+                            color: currentIndex == selectedIndex
+                                ? UIColor.mainColor
+                                : Colors.white,
+                            border:
+                                Border.all(width: 1, color: UIColor.mainColor));
+                      },
+                    )
+                  ],
+                ),
+              ),
+              YsFilterPickerRowWidget(
+                height: AdaptUI.rpx(100),
+                title: "籍贯",
+                child: getLine<String>(keyRegion, initValue: "").addObserver(
+                    builder: (context, data, _) =>
+                        YsFilterSlice.pickerText(data, "请选择籍贯")),
+                tapAction: (tap) => this.filterRegionPickerDidTap(),
+              ),
+              Container(
+                height: AdaptUI.rpx(150),
+                padding: EdgeInsets.only(
+                    left: AdaptUI.rpx(120), right: AdaptUI.rpx(120)),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      child: Container(
+                        width: AdaptUI.rpx(220),
+                        height: AdaptUI.rpx(80),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 1),
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
+                        child: Center(child: Text("取消")),
+                      ),
+                      onTapUp: (tap) => this.filterTapDimiss(),
+                    ),
+                    GestureDetector(
+                      child: Container(
+                        width: AdaptUI.rpx(220),
+                        height: AdaptUI.rpx(80),
+                        decoration: BoxDecoration(
+                            color: UIColor.mainColor,
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
+                        child: Center(
+                            child: Text(
+                          "确定",
+                          style: TextStyle(color: Colors.white),
+                        )),
+                      ),
+                      onTapUp: (tap) => this.filterOkDidTap(),
+                    ),
+                  ],
+                ),
+              )
+            ]),
+          );
+        });
   }
 }

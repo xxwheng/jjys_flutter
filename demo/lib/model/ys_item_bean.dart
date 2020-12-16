@@ -1,72 +1,84 @@
-
 import 'package:json_annotation/json_annotation.dart';
-
-part 'ys_item_bean.g.dart';
 
 /* 月嫂列表 单项  */
 
-@JsonSerializable()
 class YsItemBean extends Object {
-
-  @JsonKey(name: "id")
   int id;
 
-  @JsonKey(name: "level")
   String level;
 
-  @JsonKey(name: "is_credit")
-  var isCredit;
+  String isCredit;
 
-  @JsonKey(name: "citycode")
   String cityCode;
 
-  @JsonKey(name: "province")
   String province;
 
-  @JsonKey(name: "score_comment")
-  var scoreComment;
+  int scoreComment;
 
-  @JsonKey(name: "comment_score")
-  var commentScore;
+  int commentScore;
 
-  @JsonKey(name: "certificate")
   String certificate;
 
-  @JsonKey(name: "birthday")
   String birthday;
 
-  @JsonKey(name: "province_name")
   String provinceName;
 
-  @JsonKey(name: "nickname")
   String nickname;
 
-  @JsonKey(name: "headphoto")
   String headPhoto;
 
-  @JsonKey(name: "price")
-  int price;
+  String price;
 
-  @JsonKey(name: "desc")
   String desc;
 
-  @JsonKey(name: "service")
-  int service;
+  String service;
 
-  @JsonKey(name: "experience")
-  var experience;
+  String experience;
 
-  @JsonKey(name: "market_price")
-  var market_price;
+  String marketPrice;
 
-  @JsonKey(name: "care_type")
   String careType;
 
-  YsItemBean(this.id,this.level,this.isCredit,this.cityCode,this.province,
-      this.scoreComment,this.commentScore,this.certificate,this.birthday,
-      this.provinceName,this.nickname,this.headPhoto,this.desc,this.price,this.service,this.careType);
+  YsItemBean(
+      this.id,
+      this.level,
+      this.isCredit,
+      this.cityCode,
+      this.province,
+      this.scoreComment,
+      this.commentScore,
+      this.certificate,
+      this.birthday,
+      this.provinceName,
+      this.nickname,
+      this.headPhoto,
+      this.desc,
+      this.price,
+      this.service,
+      this.experience,
+      this.marketPrice,
+      this.careType);
 
-  factory YsItemBean.fromJson(Map<String, dynamic> json) => _$YsItemBeanFromJson(json);
-
-  Map<String, dynamic> toJson() => _$YsItemBeanToJson(this);
+  factory YsItemBean.fromJson(Map<String, dynamic> json) {
+    return YsItemBean(
+      int.parse(json['id'].toString()) ?? 0,
+      json['level'].toString(),
+      json['is_credit'].toString(),
+      json['citycode'].toString(),
+      json['province'].toString(),
+      int.parse(json['score_comment'].toString()) ?? 0,
+      int.parse(json['comment_score'].toString()) ?? 0,
+      json['certificate'].toString(),
+      json['birthday'].toString(),
+      json['province_name'].toString(),
+      json['nickname'].toString(),
+      json['headphoto'].toString(),
+      json['desc'].toString(),
+      json['price'].toString(),
+      json['service'].toString(),
+      json['experience'].toString(),
+      json['market_price'].toString(),
+      json['care_type'].toString(),
+    );
+  }
 }
