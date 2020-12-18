@@ -50,7 +50,6 @@ mixin BasePageFutureInterface {
               break;
           }
         } else {
-          logger.i("正在连接");
           return loading ?? _loadingPage;
         }
       },

@@ -14,7 +14,25 @@ class ArticleCategoryBean {
   factory ArticleCategoryBean.fromJson(Map<String, dynamic> json) {
     return ArticleCategoryBean(json["id"].toString(), json["title"].toString(), json["list_no"].toString(), json["create_at"].toString());
   }
+}
 
+/// 文章列表
+class ArticleListBean {
+  int page;
+  int total;
+  List<ArticleBean> list;
+
+  ArticleListBean(this.page, this.total, this.list);
+
+  factory ArticleListBean.fromJson(Map<String, dynamic> json) {
+    return ArticleListBean(
+        int.parse(json['page'].toString()),
+        int.parse(json['total'].toString()),
+        (json['data'] as List)
+            ?.map((e) => e == null ? null : ArticleBean.fromJson(e))
+            ?.toList()
+    );
+  }
 }
 
 /// 文章 模型

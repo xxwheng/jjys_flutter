@@ -45,11 +45,15 @@ class SingleDataLine<T> {
     inner.add(model);
   }
 
+  void onFailure() {
+    model.state = LineState.failure;
+    inner.add(model);
+  }
+
   void setState(LineState state) {
     if (state == model.state) return;
     model.state = state;
     inner.add(model);
-    print("setState更新");
   }
 
   void setData(T t) {
@@ -60,7 +64,6 @@ class SingleDataLine<T> {
     model.data = t;
     model.state = LineState.success;
     inner.add(model);
-    print("更新setData");
   }
 
   Widget addObserver({Widget Function(BuildContext context, T data, Widget child) builder, Widget child, VoidCallback onRefresh}) {
@@ -98,7 +101,6 @@ class _DataObserverWidgetState<T> extends State<DataObserverWidget<T>> {
   Widget build(BuildContext context) {
     return StreamBuilder<LineModel<T>>(
       stream: widget._dataLine.outer,
-
       builder: (BuildContext context, AsyncSnapshot<LineModel<T>> snapshot) {
         if (snapshot != null && snapshot.data != null) {
           switch (snapshot.data.state) {
@@ -114,7 +116,6 @@ class _DataObserverWidgetState<T> extends State<DataObserverWidget<T>> {
               );
               break;
             case LineState.success:
-              print("数据更新");
               return widget._builder(context, snapshot.data.data, widget.child);
               break;
             case LineState.failure:

@@ -9,6 +9,7 @@ import 'package:demo/page/mine/my_coupon.dart';
 import 'package:demo/page/mine/my_info.dart';
 import 'package:demo/page/mine/my_info_nickname.dart';
 import 'package:demo/page/mine/ys_collect.dart';
+import 'package:demo/page/order/order_ys_commit.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/page/yuesao/work_show.dart';
 import 'package:demo/page/yuesao/ys_detail.dart';
@@ -86,4 +87,12 @@ var myCouponPageHandler = Handler(
 /* 修改个人昵称*/
 var myInfoNickNameHandler = Handler(
   handlerFunc: (BuildContext context, Map<String, dynamic> params) => MyInfoNickNamePage()
+);
+
+/* 月嫂提交订单页 */
+var ysOrderCommitHandler = Handler(
+  handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+    String id = params['id']?.first?.toString();
+    return OrderYsCommitPage(id: id);
+  }
 );

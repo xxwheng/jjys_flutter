@@ -8,6 +8,8 @@ import 'package:demo/model/ys_list_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:demo/template/yuesao/cell_yuesao.dart';
+import 'package:demo/utils/bus/data_bus.dart';
+import 'package:demo/utils/bus/data_line.dart';
 import 'package:demo/utils/v_toast.dart';
 import 'package:flutter/material.dart';
 
@@ -23,16 +25,20 @@ class CollectYsTabView extends StatefulWidget {
 }
 
 class _CollectYsTabViewState extends State<CollectYsTabView>
-    with PageDataSource<UserCollectBean>, AutomaticKeepAliveClientMixin {
+    with PageDataSource<UserCollectBean>, AutomaticKeepAliveClientMixin, MultiDataLine {
 
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
+  String key;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    key = "collectKey${widget.type.index}";
+    getLine<int>(key).onLoading();
     onRefresh();
   }
 
@@ -52,14 +58,18 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
       var page = int.parse(res['page'].toString());
       var total = int.parse(res['total'].toString());
       addList(collectList, page, total);
+      getLine<int>(key).setData(DateTime.now().millisecondsSinceEpoch);
     }).catchError((err) {
       this.endRefreshing(status: false);
+      if (list.isEmpty) {
+        getLine<int>(key).onFailure();
+      }
     }).whenComplete(() {});
   }
 
   /* 点击进详情 */
   void _gotoDetails(UserCollectBean bean) {
-    if (bean.type == "1") {
+    if (widget.type == JJRoleType.matron) {
       App.navigationTo(context, PageRoutes.ysDetailPage+'?id=${bean.info.id}');
     } else {
     }
@@ -73,49 +83,52 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
       "role": bean.type
     }).then((value) {
       VToast.show("取消成功");
-      setState(() {
-        list.remove(bean);
-      });
+      list.remove(bean);
+      getLine<int>(key).setData(DateTime.now().millisecondsSinceEpoch);
     });
   }
 
   @override
   // ignore: must_call_super
   Widget build(BuildContext context) {
-    return PageRefreshWidget(
-      pageDataSource: this,
-      child: ListView.builder(
-        itemCount: list.length,
-        itemBuilder: (context, index) {
-        UserCollectYsInfoBean item = list[index].info;
-        return Container(
-          padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
-          margin: EdgeInsets.only(
-              left: AdaptUI.rpx(30),
-              top: AdaptUI.rpx(20),
-              right: AdaptUI.rpx(30),
-              bottom: AdaptUI.rpx(0)),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
-          child: GestureDetector(
-            child: CellYuesao(
-              type: widget.type,
-              headPhoto: item.icon,
-              isCredit: item.isCredit == 1,
-              level: item.level,
-              careType: item.careType,
-              nickName: item.name,
-              desc: item.recommend,
-              score: "${item.scoreComment}",
-              price: item.price,
-              service: item.service,
-              cancelTap: () => _reqCancel(list[index]),
-            ),
-            onTapUp: (TapUpDetails detail) => _gotoDetails(list[index]),
-          ),
+    return getLine<int>(key).addObserver(
+      builder: (ctx, data, _) {
+        return PageRefreshWidget(
+          pageDataSource: this,
+          child: ListView.builder(
+              itemCount: list.length,
+              itemBuilder: (context, index) {
+                UserCollectYsInfoBean item = list[index].info;
+                return Container(
+                  padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
+                  margin: EdgeInsets.only(
+                      left: AdaptUI.rpx(30),
+                      top: AdaptUI.rpx(20),
+                      right: AdaptUI.rpx(30),
+                      bottom: AdaptUI.rpx(0)),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
+                  child: GestureDetector(
+                    child: CellYuesao(
+                      type: widget.type,
+                      headPhoto: item.icon,
+                      isCredit: item.isCredit == 1,
+                      level: item.level,
+                      careType: item.careType,
+                      nickName: item.name,
+                      desc: item.recommend,
+                      score: "${item.scoreComment}",
+                      price: item.price,
+                      service: item.service,
+                      cancelTap: () => _reqCancel(list[index]),
+                    ),
+                    onTapUp: (TapUpDetails detail) => _gotoDetails(list[index]),
+                  ),
+                );
+              }),
         );
-      }),
+      }
     );
   }
 }

@@ -12,6 +12,8 @@ import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:demo/slice/comment_cell.dart';
 import 'package:demo/slice/heart_row.dart';
+import 'package:demo/slice/safe_bottom_control.dart';
+import 'package:demo/slice/ys_detail_bottom.dart';
 import 'package:demo/slice/ys_detail_cert_chart.dart';
 import 'package:demo/slice/ys_detail_header.dart';
 import 'package:demo/slice/ys_detail_schedule.dart';
@@ -80,7 +82,10 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
         showList = showList.sublist(0, 3);
       }
       this.showList = showList;
-      return Future.wait([parseYsDetailCompute(resArr[0]),parseYsCommentListCompute(resArr[2])]) ;
+      return Future.wait([
+        parseYsDetailCompute(resArr[0]),
+        parseYsCommentListCompute(resArr[2])
+      ]);
     }).then((value) {
       this._ysBean = value[0];
       this._commentList = value[1];
@@ -88,58 +93,6 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
     }).catchError((err) {
       getLine<YsDetailBean>(keyInfo).setState(LineState.failure);
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("月嫂详情"),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: getLine<YsDetailBean>(keyInfo).addObserver(
-        onRefresh: onRefresh,
-        builder: (context, data, _workShow) {
-          logger.i("构建build");
-          return ListView.builder(
-            itemCount: _commentList.data.length+3,
-            itemBuilder: (ctx, index) {
-              if (index == 0) {
-                return Column(
-                  children: [
-                    ysDetailHeader(),
-                    ysDetailSkillSection(),
-                    ysChartWidget(),
-                    workShowList(),
-                    YsDetailScheduleWidget(),
-                  ],
-                );
-              } else if (index == 1) {
-                return serviceContent();
-              } else if (index == 2) {
-                return YsDetailScoreWidget(
-                  commentNum: _commentList.data.length,
-                  avg: _commentList.score.scoreAvg,
-                  scoreList: _commentList.score.ysScoreList,
-                );
-              } else {
-                var e = _commentList.data[index-3];
-                return YsCommentCell(
-                  headIcon: e.headPhoto,
-                  name: e.username,
-                  service: "服务${e.productDays}天",
-                  score: e.score,
-                  time: e.timeStr,
-                  desc: e.detail,
-                  pics: e.image,
-                );
-              }
-            },
-          );
-        },
-      ),
-    );
   }
 
   /* 点击工作风采 */
@@ -169,6 +122,90 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
       context,
       PageRoutes.singleWebPage +
           "?title=${Uri.encodeComponent(_ysBean.profile.nickname)}&url=${Uri.encodeComponent(url)}",
+    );
+  }
+
+  void _gotoYsCommitOrder() {
+    App.navigationTo(context, PageRoutes.ysOrderCommitPage+"?id=${widget.id}");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("月嫂详情"),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: getLine<YsDetailBean>(keyInfo).addObserver(
+        onRefresh: onRefresh,
+        builder: (context, data, _) {
+          logger.i("构建build");
+          return Stack(
+            children: [
+              Positioned(
+                child: pageListView(),
+                bottom: 0,
+                top: 0,
+                left: 0,
+                right: 0,
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: YsDetailBottomWidget(
+                  id: _ysBean.profile.id,
+                  type: JJRoleType.matron,
+                  isCollect: _ysBean.isCollect == 1,
+                  onChat: ()=>App.navigationToChatLink(context),
+                  onMake: _gotoYsCommitOrder,
+                ),
+              )
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget pageListView() {
+    return ListView.builder(
+      itemCount: _commentList.data.length + 4,
+      itemBuilder: (ctx, index) {
+        if (index == 0) {
+          return Column(
+            children: [
+              ysDetailHeader(),
+              ysDetailSkillSection(),
+              ysChartWidget(),
+              workShowList(),
+              YsDetailScheduleWidget(),
+            ],
+          );
+        } else if (index == 1) {
+          return serviceContent();
+        } else if (index == 2) {
+          return YsDetailScoreWidget(
+            commentNum: _commentList.data.length,
+            avg: _commentList.score.scoreAvg,
+            scoreList: _commentList.score.ysScoreList,
+          );
+        } else if (index == _commentList.data.length + 3) {
+          return Container(height: AdaptUI.rpx(140),);
+        } else {
+          var e = _commentList.data[index - 3];
+          return YsCommentCell(
+            headIcon: e.headPhoto,
+            name: e.username,
+            service: "服务${e.productDays}天",
+            score: e.score,
+            time: e.timeStr,
+            desc: e.detail,
+            pics: e.image,
+          );
+        }
+      },
     );
   }
 
@@ -217,51 +254,53 @@ class _YsDetailPageState extends State<YsDetailPage> with MultiDataLine {
 
   /// 工作风采
   Widget workShowList() {
-    return showList.length > 0 ? Container(
-          margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
-          padding: EdgeInsets.all(AdaptUI.rpx(30)),
-          color: Colors.white,
-          child: Column(
-            children: [
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: this._workShowDidTap,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "工作风采",
-                            style: TextStyle(fontSize: AdaptUI.rpx(32)),
+    return showList.length > 0
+        ? Container(
+            margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
+            padding: EdgeInsets.all(AdaptUI.rpx(30)),
+            color: Colors.white,
+            child: Column(
+              children: [
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: this._workShowDidTap,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "工作风采",
+                              style: TextStyle(fontSize: AdaptUI.rpx(32)),
+                            ),
                           ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: AdaptUI.rpx(30),
-                          color: UIColor.hex999,
-                        )
-                      ],
-                    ),
-                  ),
-                  Divider(),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: showList
-                    .map(
-                      (e) => CachedNetworkImage(
-                        imageUrl: e,
-                        width: AdaptUI.rpx(218),
-                        height: AdaptUI.rpx(218),
-                        fit: BoxFit.cover,
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: AdaptUI.rpx(30),
+                            color: UIColor.hex999,
+                          )
+                        ],
                       ),
-                    )
-                    .toList(),
-              )
-            ],
-          ),
-        ) : Row();
+                    ),
+                    Divider(),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: showList
+                      .map(
+                        (e) => CachedNetworkImage(
+                          imageUrl: e,
+                          width: AdaptUI.rpx(218),
+                          height: AdaptUI.rpx(218),
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                      .toList(),
+                )
+              ],
+            ),
+          )
+        : Row();
   }
 
   @override

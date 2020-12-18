@@ -117,7 +117,10 @@ flutter:
     - images/ys_d_3.png
     - images/ys_d_4.png
     - images/ys_d_5.png
+    - images/like_0.png
+    - images/like_1.png
     - images/image01.jpg
+    - lib/data/city.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

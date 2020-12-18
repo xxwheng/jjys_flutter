@@ -1,15 +1,15 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
-import 'package:demo/common/common.dart';
+import 'package:demo/data/bean_compute.dart';
 import 'package:demo/data/global_data.dart';
 import 'package:demo/model/config_yswork_bean.dart';
 import 'package:demo/model/level_bean.dart';
 import 'package:demo/model/province_bean.dart';
 import 'package:demo/model/year_filter_bean.dart';
 import 'package:demo/model/ys_item_bean.dart';
-import 'package:demo/model/ys_list_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
+import 'package:demo/slice/filter_nav_widget.dart';
 import 'package:demo/slice/ys_filter_picker.dart';
 import 'package:demo/slice/ys_wrap_filter.dart';
 import 'package:demo/slice/ys_wrap_multi_filter.dart';
@@ -17,6 +17,7 @@ import 'package:demo/template/yuesao/cell_yuesao.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/utils/bus/data_bus.dart';
+import 'package:demo/utils/bus/data_line.dart';
 import 'package:demo/utils/single_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,28 +34,22 @@ class _YuyingListPageState extends State<YuyingListPage>
         PageDataSource<YsItemBean>,
         SingleTickerProviderStateMixin,
         MultiDataLine {
+  final String _keyList = "key_list";
   final String _keyWork = "workKey";
 
-  int navIndex = 0;
-  List<Map<String, String>> navArray = [
-    {"title": "综合", "desc": "1"},
-    {"title": "价格", "desc": "1"},
-    {"title": "评价", "desc": "1"},
-    {"title": "筛选", "desc": "1"},
-  ];
-
-  bool showFilter = false;
+  String _listOrder = "1";
+  String _forceDesc = "1";
 
   ConfigYsWorkBean configBean = ConfigYsWorkBean();
 
   /// 年龄数组
-  List<YsFilterYearBean> yearFilterArray;
+  List<YsFilterYearBean> yearFilterArray = gYearFilterArray;
 
   /// 筛选年龄
   YsFilterYearBean yearBean;
 
   /// 育婴师分类 筛选
-  List<YuyingFilterCareTypeBean> careTypeFilterArray;
+  List<YuyingFilterCareTypeBean> careTypeFilterArray = gCareTypeFilterArray;
   YuyingFilterCareTypeBean careTypeBean;
 
   /// 筛选省份
@@ -64,102 +59,32 @@ class _YuyingListPageState extends State<YuyingListPage>
   List<LevelBean> levelBeanList;
 
   /// 筛选日期
-  String predictDay;
+  String predictDay = "";
 
+  /// 弹窗上下文
   BuildContext _filterSheetCtx;
-
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    getLine<int>(_keyList).onLoading();
     initData();
     onRefresh();
     loadYuyingConfigWork();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    dataBusDispose();
-    super.dispose();
-  }
-
   void initData() {
     filterProvince = ProvinceBean("", "");
-    var careTypeTitleArr = ["不限", "育婴护理师", "育儿护理师", "幼儿护理师"];
-    var yearTitleArr = ["不限", "30岁以下", "30~40岁", "40岁以上"];
-    yearFilterArray = yearTitleArr
-        .asMap()
-        .keys
-        .map((e) => YsFilterYearBean(e, yearTitleArr[e]))
-        .toList();
     yearBean = yearFilterArray[0];
-
-    careTypeFilterArray = careTypeTitleArr
-        .asMap()
-        .keys
-        .map((e) => YuyingFilterCareTypeBean(e, careTypeTitleArr[e]))
-        .toList();
     careTypeBean = careTypeFilterArray[0];
-//    setState(() {});
-  }
-
-  /// 菜单栏 icon
-  Widget afterIcon(int index) {
-    if (index == 0) {
-      return Icon(
-        Icons.keyboard_arrow_down,
-        size: AdaptUI.rpx(28),
-        color: navIndex == 0 ? UIColor.mainColor : UIColor.hex666,
-      );
-    } else if (index < 3) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.keyboard_arrow_up,
-            size: AdaptUI.rpx(28),
-            color: navIndex == index && navArray[index]['desc'] == '0'
-                ? UIColor.mainColor
-                : UIColor.hex666,
-          ),
-          Icon(
-            Icons.keyboard_arrow_down,
-            size: AdaptUI.rpx(28),
-            color: navIndex == index && navArray[index]['desc'] == '1'
-                ? UIColor.mainColor
-                : UIColor.hex666,
-          )
-        ],
-      );
-    } else {
-      return Icon(Icons.filter_alt_outlined, size: AdaptUI.rpx(28));
-    }
-  }
-
-  void showPickerWidget() {
-    print("显示picker");
   }
 
   /* 导航按钮点击 */
-  void navItemDidTap(int index) {
-    if (this.navIndex == index) {
-      if (index < this.navArray.length - 1 && index > 0) {
-        this.navArray[index]["desc"] =
-            this.navArray[index]["desc"] == "1" ? "0" : "1";
-      } else {
-        return;
-      }
-    }
-
-    if (index < this.navArray.length - 1) {
-      this.navIndex = index;
-      this.onRefresh();
-    } else {
-      filterShow();
-    }
+  void _navDidChanged(String listOrder, String forceDesc) {
+    _listOrder = listOrder;
+    _forceDesc = forceDesc;
+    this.onRefresh();
   }
 
   @override
@@ -174,8 +99,8 @@ class _YuyingListPageState extends State<YuyingListPage>
     }
 
     XXNetwork.shared.post(params: {
-      "list_order": "${this.navIndex < 3 ? this.navIndex + 1 : 1}",
-      "force_desc": "${this.navArray[this.navIndex]["desc"]}",
+      "list_order": _listOrder,
+      "force_desc": _forceDesc,
       "methodName": "SkillerYuyingIndex",
       "day_buy": 0,
       "care_type": careTypeBean.id,
@@ -185,12 +110,15 @@ class _YuyingListPageState extends State<YuyingListPage>
       "region": "${filterProvince?.code ?? 0}",
       "predict_day": timestamp
     }).then((res) {
-      var ysList = YsListBean.fromJson(res);
-      var page = int.parse(ysList.page.toString());
-      var total = int.parse(ysList.total.toString());
-      addList(ysList.data, page, total);
+      return parseYsListCompute(res);
+    }).then((value) {
+      addList(value.data, value.page, value.total);
+      getLine<int>(_keyList).setData(DateTime.now().millisecond);
     }).catchError((err) {
       this.endRefreshing(status: false);
+      if (list.isEmpty) {
+        getLine<int>(_keyList).setState(LineState.failure);
+      }
     }).whenComplete(() {});
   }
 
@@ -199,16 +127,99 @@ class _YuyingListPageState extends State<YuyingListPage>
     XXNetwork.shared.post(params: {
       "methodName": "ConfigYuesaoOnwork",
     }).then((value) {
-      ConfigYsWorkBean configBean = ConfigYsWorkBean.fromJson(value);
-//      setState(() {
-//        this.configBean = configBean;
-//      });
+      return parseYsConfigCompute(value);
+    }).then((bean) {
+      this.configBean = bean;
     });
   }
 
+  /* 点击进入育婴师详情 */
+  void ysItemDidTap(YsItemBean item) {
+    App.navigationTo(context, PageRoutes.ysDetailPage);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("找育婴师"),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          FilterNavWidget(
+            onChanged: _navDidChanged,
+            showFilter: this.filterShow,
+          ),
+          Positioned(
+            top: AdaptUI.rpx(120),
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: getLine<int>(_keyList).addObserver(
+              builder: (ctx, data, _) => pageListWidget(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /* 列表 */
+  Widget pageListWidget() {
+    return PageRefreshWidget(
+      pageDataSource: this,
+      child: ListView.builder(
+        itemCount: list.length,
+        itemBuilder: (ctx, index) {
+          YsItemBean item = list[index];
+          return Container(
+            padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
+            margin: EdgeInsets.only(
+                left: AdaptUI.rpx(30),
+                top: AdaptUI.rpx(20),
+                right: AdaptUI.rpx(30),
+                bottom: AdaptUI.rpx(0)),
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AdaptUI.rpx(10))),
+            child: GestureDetector(
+              child: CellYuesao(
+                type: JJRoleType.nurse,
+                isCredit: item.isCredit.toString() == '1',
+                headPhoto: item.headPhoto,
+                level: item.level,
+                careType: item.careType,
+                nickName: item.nickname,
+                desc: item.desc,
+                score: "${item.scoreComment}",
+                price: "${item.price}",
+                service: "${item.service}",
+                showCancel: false,
+              ),
+              onTapUp: (TapUpDetails detail) => this.ysItemDidTap(item),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    dataBusDispose();
+    super.dispose();
+  }
+
+  /* 筛选刷新指定widget的键key */
+  final String keyPreDay = "key_preDay";
+  final String keyRegion = "key_region";
+
   // 筛选窗弹出
   void filterShow() {
-    showFilterSheet(context);
+    _showFilterSheet(context);
   }
 
   // 筛选确认
@@ -228,6 +239,7 @@ class _YuyingListPageState extends State<YuyingListPage>
 
   /* 预约时间筛选 */
   void filterDatePickerDidTap() {
+    print("timePicker");
     DatePicker.showDatePicker(context, onConfirm: (date) {
       this.predictDay = date.toString().split(" ").first;
       getLine<String>(keyPreDay).setData(this.predictDay);
@@ -252,122 +264,18 @@ class _YuyingListPageState extends State<YuyingListPage>
 
   /* 籍贯选择 */
   void filterRegionPickerDidTap() {
+
     SinglePicker(
         context: this.context,
-        list: configBean.provinceYuyingArr
-            .map((e) => e.cityName)
-            .toList(),
+        list: configBean.provinceYuyingArr.map((e) => e.cityName).toList(),
         itemChanged: (index) {
-          this.filterProvince =
-          configBean.provinceYuyingArr[index];
-          getLine<String>(keyRegion)
-              .setData(this.filterProvince.cityName);
+          this.filterProvince = configBean.provinceYuyingArr[index];
+          getLine<String>(keyRegion).setData(this.filterProvince.cityName);
         }).show();
   }
 
-  /* 点击进入育婴师详情 */
-  void ysItemDidTap(YsItemBean item) {
-    App.navigationTo(context, PageRoutes.ysDetailPage);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("找育婴师"),
-        elevation: 0,
-      ),
-      body: Stack(
-        children: [
-          Positioned(
-            top: AdaptUI.rpx(120),
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: PageRefreshWidget(
-                pageDataSource: this,
-                child: ListView.builder(
-                    itemCount: list.length,
-                    itemBuilder: (ctx, index) {
-                      YsItemBean item = list[index];
-                      return Container(
-                        padding: EdgeInsets.only(left: AdaptUI.rpx(30)),
-                        margin: EdgeInsets.only(
-                            left: AdaptUI.rpx(30),
-                            top: AdaptUI.rpx(20),
-                            right: AdaptUI.rpx(30),
-                            bottom: AdaptUI.rpx(0)),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                                BorderRadius.circular(AdaptUI.rpx(10))),
-                        child: GestureDetector(
-                          child: CellYuesao(
-                            type: JJRoleType.nurse,
-                            isCredit: item.isCredit.toString() == '1',
-                            headPhoto: item.headPhoto,
-                            level: item.level,
-                            careType: item.careType,
-                            nickName: item.nickname,
-                            desc: item.desc,
-                            score: "${item.scoreComment}",
-                            price: "${item.price}",
-                            service: "${item.service}",
-                            showCancel: false,
-                          ),
-                          onTapUp: (TapUpDetails detail) =>
-                              this.ysItemDidTap(item),
-                        ),
-                      );
-                    })),
-          ),
-          // 顶部筛选导航
-          Positioned(
-            height: AdaptUI.rpx(120),
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
-              height: AdaptUI.rpx(120),
-              width: AdaptUI.screenWidth,
-              child: Row(
-                  children: navArray.asMap().keys.map((index) {
-                return Expanded(
-                  child: InkWell(
-                    child: Container(
-                      height: AdaptUI.rpx(120),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            navArray[index]["title"],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: AdaptUI.rpx(32),
-                                color: navIndex == index
-                                    ? UIColor.mainColor
-                                    : UIColor.hex333),
-                          ),
-                          afterIcon(index),
-                        ],
-                      ),
-                    ),
-                    onTap: () => this.navItemDidTap(index),
-                  ),
-                );
-              }).toList()),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  final String keyPreDay = "key_preDay";
-  final String keyRegion = "key_region";
-
   /* Sheet */
-  showFilterSheet(BuildContext context) {
+  _showFilterSheet(BuildContext context) {
     showModalBottomSheet(
         context: context,
         isDismissible: true,

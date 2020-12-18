@@ -1,4 +1,5 @@
 
+import 'package:demo/common/common.dart';
 import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/mine/ys_collect.dart';
 import 'package:fluro/fluro.dart';
@@ -8,13 +9,18 @@ import 'route_handles.dart';
 class App {
   static FluroRouter router;
 
-  static void navigationTo(BuildContext context, String path) {
-    router.navigateTo(context, path, transition: TransitionType.cupertino);
+  static Future navigationTo(BuildContext context, String path) {
+    return router.navigateTo(context, path, transition: TransitionType.cupertino);
   }
 
   static void navigationToWeb(BuildContext context, String title, String path) async {
     String url = await WebUrlBridge.urlBridget(path);
     App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent(title)}&url=${Uri.encodeComponent(url)}",);
+  }
+
+  /* 跳转商务通 */
+  static void navigationToChatLink(BuildContext context) {
+    logger.i("商务通");
   }
 
   static void pop(BuildContext context) {
@@ -61,6 +67,10 @@ class PageRoutes {
 
   /* 修改个人昵称 */
   static String myInfoNickNamePage = "/page/mine/my_info_nickname";
+
+  /* 月嫂提交订单 */
+  static String ysOrderCommitPage = "/page/order/order_ys_commit";
+
 
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);

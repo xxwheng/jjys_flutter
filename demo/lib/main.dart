@@ -17,7 +17,7 @@ void main() {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => CorpData()),
-      ChangeNotifierProvider(create: (_) => UserData())
+      ChangeNotifierProvider(create: (_) => UserData()),
     ],
     child: MyApp(),
   ));

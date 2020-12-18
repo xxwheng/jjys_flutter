@@ -21,6 +21,8 @@ class UIColor {
   // 等级 屎黄色
   static const Color levelYellow = Color(0xffeeb653);
 
+  static const Color kOrange = Color(0xFFF3C682);
+
   static const Color hex999 = Color(0xff999999);
 
   // 字体星级颜色

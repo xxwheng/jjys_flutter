@@ -43,7 +43,7 @@ class CorpData with ChangeNotifier {
     });
   }
   
-  void changeCorp(CorpCityBean corp) async {
+  void changeCorp(CorpCityBean corp) {
     if (corp.id != corpBean.id) {
       setCorpDataCache(corp);
       this.corpBean = corp;

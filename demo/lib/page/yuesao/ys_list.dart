@@ -12,6 +12,7 @@ import 'package:demo/model/ys_list_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:demo/page/root/base_page_interface.dart';
+import 'package:demo/slice/filter_nav_widget.dart';
 import 'package:demo/slice/ys_filter_picker.dart';
 import 'package:demo/slice/ys_wrap_filter.dart';
 import 'package:demo/slice/ys_wrap_multi_filter.dart';
@@ -38,19 +39,11 @@ class _YuesaoListPageState extends State<YuesaoListPage>
         PageDataSource<YsItemBean>,
         SingleTickerProviderStateMixin,
         MultiDataLine {
+
   final String keyList = "key_list";
-  final String keyNav = "key_nav";
-  final String keyIndex = "key_index";
 
-  int navIndex = 0;
-  List<Map<String, String>> navArray = [
-    {"title": "综合", "desc": "1"},
-    {"title": "价格", "desc": "1"},
-    {"title": "评价", "desc": "1"},
-    {"title": "筛选", "desc": "1"},
-  ];
-
-  bool showFilter = false;
+  String _listOrder = "1";
+  String _forceDesc = "1";
 
   ConfigYsWorkBean configBean = ConfigYsWorkBean();
 
@@ -61,7 +54,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
   String dayBuy = "26";
 
   /// 年龄数组
-  List<YsFilterYearBean> yearFilterArray;
+  List<YsFilterYearBean> yearFilterArray = gYearFilterArray;
 
   /// 筛选年龄
   YsFilterYearBean yearBean;
@@ -78,70 +71,31 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     super.initState();
     getLine<int>(keyList).onLoading();
     initData();
-    onLoad();
+    onRefresh();
+    loadYueSaoConfigWork();
   }
 
   void initData() {
     filterProvince = ProvinceBean("", "");
-    var titleArr = ["不限", "30岁以下", "30~40岁", "40岁以上"];
-    yearFilterArray = titleArr
-        .asMap()
-        .keys
-        .map((e) => YsFilterYearBean(e, titleArr[e]))
-        .toList();
     yearBean = yearFilterArray[0];
   }
 
   /* 导航按钮点击 */
-  void navItemDidTap(int index) {
-    if (this.navIndex == index) {
-      if (index < this.navArray.length - 1 && index > 0) {
-        this.navArray[index]["desc"] =
-            this.navArray[index]["desc"] == "1" ? "0" : "1";
-        getLine<List<Map<String, String>>>(keyNav).setData([...this.navArray]);
-        this.onRefresh();
-      }
-      return;
-    }
-
-    if (index < this.navArray.length - 1) {
-      this.navIndex = index;
-      getLine<int>(keyIndex).setData(index);
-      this.onRefresh();
-    } else {
-      filterShow();
-    }
+  void _navDidChanged(String listOrder, String forceDesc) {
+    _listOrder = listOrder;
+    _forceDesc = forceDesc;
+    this.onRefresh();
   }
 
-  void onLoad() async {
-    Future.wait([
-      XXNetwork.shared.post(params: {
-        "list_order": "1",
-        "force_desc": "1",
-        "methodName": "YuesaoIndex",
-        "day_buy": '26',
-        "size": "$size",
-        "page": "$page",
-      }),
-      XXNetwork.shared.post(params: {
-        "methodName": "ConfigYuesaoOnwork",
-      })
-    ]).then((value) {
-      return Future.wait(
-          [parseYsListCompute(value[0]), parseYsConfigCompute(value[1])]);
-    }).then((resArr) {
-      ConfigYsWorkBean configBean = resArr[1];
+  /* 筛选配置 */
+  void loadYueSaoConfigWork() async {
+    XXNetwork.shared.post(params: {
+      "methodName": "ConfigYuesaoOnwork",
+    }).then((value) {
+      return parseYsConfigCompute(value);
+    }).then((config) {
+      this.configBean = config;
       this.dayBuy = configBean.serviceDayArr?.first?.toString() ?? "26";
-      this.configBean = configBean;
-
-      YsListBean ysData = resArr[0];
-      addList(ysData.data, ysData.page, ysData.total);
-      Future.delayed(Duration(milliseconds: 100), () {
-        getLine<List<Map<String, String>>>(keyNav).setData(this.navArray);
-        getLine<int>(keyList).setData(DateTime.now().millisecondsSinceEpoch);
-      });
-    }).catchError((err) {
-      getLine<int>(keyList).setState(LineState.failure);
     });
   }
 
@@ -157,8 +111,8 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     }
 
     XXNetwork.shared.post(params: {
-      "list_order": "${this.navIndex < 3 ? this.navIndex + 1 : 1}",
-      "force_desc": "${this.navArray[this.navIndex]["desc"]}",
+      "list_order": _listOrder,
+      "force_desc": _forceDesc,
       "methodName": "YuesaoIndex",
       "day_buy": dayBuy,
       "size": "$size",
@@ -174,22 +128,14 @@ class _YuesaoListPageState extends State<YuesaoListPage>
       getLine<int>(keyList).setData(DateTime.now().millisecondsSinceEpoch);
     }).catchError((err) {
       this.endRefreshing(status: false);
+      if (list.isEmpty) {
+        getLine<int>(keyList).setState(LineState.failure);
+      }
     }).whenComplete(() {});
   }
 
-  /* 筛选配置 */
-  void loadYuesaoConfigWork() async {
-    XXNetwork.shared.post(params: {
-      "methodName": "ConfigYuesaoOnwork",
-    }).then((value) {
-      return parseYsConfigCompute(value);
-    }).then((config) {
-      this.dayBuy = configBean.serviceDayArr?.first?.toString() ?? "26";
-      this.configBean = configBean;
-    });
-  }
 
-  /* 点击进入育婴师详情 */
+  /* 点击进入月嫂详情 */
   void ysItemDidTap(YsItemBean item) {
     App.navigationTo(context, PageRoutes.ysDetailPage + '?id=${item.id}');
   }
@@ -202,25 +148,13 @@ class _YuesaoListPageState extends State<YuesaoListPage>
         elevation: 0,
       ),
       body: Column(children: [
-        Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
-          height: AdaptUI.rpx(120),
-          width: AdaptUI.screenWidth,
-          child: getLine<List<Map<String, String>>>(keyNav).addObserver(
-              builder: (context, dataArray, _) {
-            return Row(
-                children: dataArray
-                    .asMap()
-                    .keys
-                    .map((index) => navItemWidget(index))
-                    .toList());
-          }),
+        FilterNavWidget(
+          onChanged: _navDidChanged,
+          showFilter: this.filterShow,
         ),
         Expanded(
           child: getLine<int>(keyList).addObserver(
-              onRefresh: this.onLoad,
+              onRefresh: this.onRefresh,
               builder: (context, _, __) => listWidget()),
         )
       ]),
@@ -264,68 +198,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     );
   }
 
-  ///* 头部筛选 */
-  Widget navItemWidget(int index) {
-    return Expanded(
-      child: InkWell(
-        child: Container(
-            height: AdaptUI.rpx(120),
-            child: getLine<int>(keyIndex, initValue: this.navIndex).addObserver(
-              builder: (_, tabIndex, __) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      this.navArray[index]["title"],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: AdaptUI.rpx(32),
-                          color: index == tabIndex
-                              ? UIColor.mainColor
-                              : UIColor.hex333),
-                    ),
-                    afterIcon(index),
-                  ],
-                );
-              },
-            )),
-        onTap: () => this.navItemDidTap(index),
-      ),
-    );
-  }
-
-  /// 菜单栏 icon
-  Widget afterIcon(int index) {
-    if (index == 0) {
-      return Icon(
-        Icons.keyboard_arrow_down,
-        size: AdaptUI.rpx(28),
-        color: this.navIndex == 0 ? UIColor.mainColor : UIColor.hex666,
-      );
-    } else if (index < 3) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.keyboard_arrow_up,
-            size: AdaptUI.rpx(28),
-            color: this.navIndex == index && navArray[index]['desc'] == '0'
-                ? UIColor.mainColor
-                : UIColor.hex666,
-          ),
-          Icon(
-            Icons.keyboard_arrow_down,
-            size: AdaptUI.rpx(28),
-            color: this.navIndex == index && navArray[index]['desc'] == '1'
-                ? UIColor.mainColor
-                : UIColor.hex666,
-          )
-        ],
-      );
-    } else {
-      return Icon(Icons.filter_alt_outlined, size: AdaptUI.rpx(28));
-    }
-  }
 
   @override
   void dispose() {
@@ -356,11 +228,11 @@ class _YuesaoListPageState extends State<YuesaoListPage>
   void filterOkDidTap() {
     // 处理筛选参数
     this.onRefresh();
-    this.filterTapDimiss();
+    this.filterTapDismiss();
   }
 
   // 筛选窗隐藏
-  void filterTapDimiss() {
+  void filterTapDismiss() {
     if (_filterSheetCtx != null) {
       Navigator.of(_filterSheetCtx).pop();
       _filterSheetCtx = null;
@@ -537,7 +409,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                                   BorderRadius.all(Radius.circular(5))),
                           child: Center(child: Text("取消")),
                         ),
-                        onTapUp: (tap) => this.filterTapDimiss(),
+                        onTapUp: (tap) => this.filterTapDismiss(),
                       ),
                       GestureDetector(
                         child: Container(
