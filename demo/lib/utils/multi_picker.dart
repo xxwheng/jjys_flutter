@@ -13,15 +13,16 @@ class ProvincePicker {
 
   Future initData() {
     return parseLocalCityCompute().then((value) {
-      originData = value;
+      originData = value[18].children;
       return this;
     });
   }
 
 
   void show(BuildContext context) {
-    var picker = MultiPicker(context: context, indexArr: [0,0,0], originData: originData, itemChanged: (list) {
-      print("${list[0].cityName}, ${list[1].cityName}, ${list[2].cityName}," );
+    var picker = MultiPicker(context: context, indexArr: [1,9], originData: originData, itemChanged: (list) {
+
+      print("${list[0].cityName}, ${list[1].cityName}, " );
     });
     picker.initData();
     picker.show();
@@ -51,7 +52,7 @@ class MultiPicker with MultiDataLine {
     dataSource = indexArr.map((e) => List<CityBean>()).toList();
     dataSource[0] = originData;
     if (indexArr.length >= 2) {
-      dataSource[1] = originData[0].children;
+      dataSource[1] = originData[indexArr[0]].children;
     }
     if (indexArr.length >= 3) {
       dataSource[2] = originData[indexArr[0]].children[indexArr[1]].children;

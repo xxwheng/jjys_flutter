@@ -86,7 +86,7 @@ class _PageHomeState extends State<PageHome>
 
 
     ProvincePicker()..initData().then((value) {
-      value.show();
+      value.show(context);
     });
   }
 
