@@ -2,30 +2,105 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/data/bean_compute.dart';
+import 'package:demo/data/corp_data.dart';
 import 'package:demo/model/city_bean.dart';
 import 'package:demo/utils/bus/data_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+class XXIndexCityBean {
+  int index;
+  CityBean bean;
+  XXIndexCityBean(this.index, this.bean);
+}
 
-class ProvincePicker {
-  List<CityBean> originData;
+class ProvinceData {
+  List<CityBean> _originData;
+
+  List<int> indexArray = [0,0,0];
 
   Future initData() {
     return parseLocalCityCompute().then((value) {
-      originData = value[18].children;
+      _originData = value;
       return this;
     });
   }
 
+  /* 根据省市区code查找名称 并组合*/
+  List<CityBean> searchPCTItemFromCode(String p, String c, String t) {
+    var pIndex = searchBean(p, _originData);
+    if (pIndex == null) return null;
+    var pItem = _originData[pIndex];
 
-  void show(BuildContext context) {
-    var picker = MultiPicker(context: context, indexArr: [1,9], originData: originData, itemChanged: (list) {
+    var cIndex = searchBean(c, pItem.children);
+    if (cIndex == null) return null;
+    var cItem = pItem.children[cIndex];
 
-      print("${list[0].cityName}, ${list[1].cityName}, " );
+    var tIndex = searchBean(t, cItem.children);
+    if (tIndex == null) return null;
+    var tItem = cItem.children[tIndex];
+
+    indexArray = [pIndex, cIndex, tIndex];
+    return [pItem, cItem, tItem];
+  }
+
+  /* 根据省市区code查找 index*/
+  int searchBean(String code, List<CityBean> list) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].cityCode == code) {
+        return i;
+      }
+    }
+    return null;
+  }
+}
+
+
+class ProvincePicker {
+
+  List<CityBean> _originData;
+
+
+  factory ProvincePicker(BuildContext context, ProvinceData data, ValueChanged<List<CityBean>> itemChanged) => ProvincePicker._internal(context, data, itemChanged);
+
+  MultiPicker _picker;
+
+  ProvincePicker._internal(BuildContext context, ProvinceData data, ValueChanged<List<CityBean>> itemChanged) {
+      _originData = data._originData;
+      var codeArr = this._currentCodeArr();
+      if (data.indexArray != null) {
+        codeArr = data.indexArray;
+      }
+      _picker = MultiPicker(context: context, indexArr: codeArr, originData: _originData, itemChanged: itemChanged);
+      _picker.initData();
+
+  }
+
+  Future _initData() {
+    return parseLocalCityCompute().then((value) {
+      _originData = value;
+      return this;
     });
-    picker.initData();
-    picker.show();
+  }
+
+  List<int> _currentCodeArr() {
+    var currentIndex = [0,0,0];
+    var currentCode = CorpData.shared.corpBean.cityCode;
+    if (currentCode.isEmpty) {return currentIndex;}
+    for (var i = 0; i < _originData.length; i++) {
+      for (var j = 0; j < _originData[i].children.length; j++) {
+        if (currentCode == _originData[i].children[j].cityCode) {
+          currentIndex[1] = j;
+          currentIndex[0] = i;
+          return currentIndex;
+        }
+      }
+    }
+    return currentIndex;
+  }
+
+  void show() {
+    _picker.show();
   }
 }
 
@@ -40,7 +115,7 @@ class MultiPicker with MultiDataLine {
 
   final ValueChanged<List<CityBean>> itemChanged;
 
-  final List<int> indexArr;
+  List<int> indexArr;
   List<List<CityBean>> dataSource;
 
   List<FixedExtentScrollController> controllerList;
@@ -48,8 +123,8 @@ class MultiPicker with MultiDataLine {
   BuildContext _popContext;
 
   void initData() {
-    controllerList = indexArr.map((e) => FixedExtentScrollController(initialItem: e)).toList();
-    dataSource = indexArr.map((e) => List<CityBean>()).toList();
+
+    dataSource = [List<CityBean>(),List<CityBean>(),List<CityBean>()];
     dataSource[0] = originData;
     if (indexArr.length >= 2) {
       dataSource[1] = originData[indexArr[0]].children;
@@ -57,10 +132,13 @@ class MultiPicker with MultiDataLine {
     if (indexArr.length >= 3) {
       dataSource[2] = originData[indexArr[0]].children[indexArr[1]].children;
     }
+
   }
 
 
   void show() {
+    controllerList = indexArr.map((e) => FixedExtentScrollController(initialItem: e)).toList();
+
     showCupertinoModalPopup(
         context: context,
         builder: (context) {
@@ -99,7 +177,8 @@ class MultiPicker with MultiDataLine {
       children: List.generate(indexArr.length, (section) {
         return Expanded(
           flex: 1,
-        child: getLine<List<CityBean>>("key_$section", initValue: this.dataSource[section]).addObserver(
+        child:
+        getLine<List<CityBean>>("key_$section", initValue: this.dataSource[section]).addObserver(
           builder: (ctx, _, __) {
 
             return CupertinoPicker(

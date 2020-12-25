@@ -33,6 +33,8 @@ class HttpError {
   /* 返回数据异常 */
   static const DATA_ERROR = "DATA_ERROR";
 
+  static const OPERATOR_ERROR = "操作异常";
+
 
   String code;
   String message;

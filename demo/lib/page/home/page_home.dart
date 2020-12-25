@@ -73,21 +73,16 @@ class _PageHomeState extends State<PageHome>
 
   /// 菜单按钮点击
   void menuItemDidTap(HomeMenuBean bean) {
-//    switch (bean.id.toString()) {
-//      case "1":
-//        App.navigationTo(context, PageRoutes.ysListPage);
-//        break;
-//      case "4":
-//        App.navigationTo(context, PageRoutes.yyListPage);
-//        break;
-//      default:
-//        break;
-//    }
-
-
-    ProvincePicker()..initData().then((value) {
-      value.show(context);
-    });
+    switch (bean.id.toString()) {
+      case "1":
+        App.navigationTo(context, PageRoutes.ysListPage);
+        break;
+      case "4":
+        App.navigationTo(context, PageRoutes.yyListPage);
+        break;
+      default:
+        break;
+    }
   }
 
   @override

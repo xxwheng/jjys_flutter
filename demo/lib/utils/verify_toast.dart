@@ -1,4 +1,5 @@
 import 'package:demo/common/common.dart';
+import 'package:demo/utils/v_toast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ToastRow {
@@ -19,7 +20,7 @@ class ToastUtil {
   static bool judgeList(List<ToastRow> tipList) {
     for (int i = 0; i < tipList.length; i++) {
       if (!tipList[i].verify) {
-        Fluttertoast.showToast(msg: tipList[i].hint);
+        VToast.show(tipList[i].hint);
         return false;
       }
     }

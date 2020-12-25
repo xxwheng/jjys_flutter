@@ -119,6 +119,8 @@ flutter:
     - images/ys_d_5.png
     - images/like_0.png
     - images/like_1.png
+    - images/ic_circle.png
+    - images/ic_circle_sel.png
     - images/image01.jpg
     - lib/data/city.json
 

@@ -9,15 +9,30 @@ import 'package:flutter/material.dart';
 class YuesaoHeadLevelWidget extends StatelessWidget {
   final String headUrl;
   final String level;
+
   /// 角色
   final JJRoleType type;
   final String careType;
-  
-  
-  YuesaoHeadLevelWidget({Key key, @required this.headUrl, @required this.level, this.type = JJRoleType.matron, this.careType}): super(key: key);
+
+  YuesaoHeadLevelWidget(
+      {Key key,
+      @required this.headUrl,
+      @required this.level,
+      this.type = JJRoleType.matron,
+      this.careType})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (type == JJRoleType.matron || type == JJRoleType.nurse) {
+      return hasLevelWidget();
+    } else {
+      return otherWidget();
+    }
+  }
+
+  /* 月嫂 育婴师  有等级的 */
+  Widget hasLevelWidget() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -32,11 +47,13 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
             height: AdaptUI.rpx(140),
             child: ClipOval(
               child: //headUrl == null || headUrl.isEmpty ? Image(image: AssetImage("images/place_head.png")) :
-              CachedNetworkImage(
-                placeholder: (context, url) => Image(image: AssetImage("images/place_head.png")),
+                  CachedNetworkImage(
+                placeholder: (context, url) =>
+                    Image(image: AssetImage("images/place_head.png")),
                 imageUrl: headUrl,
                 fit: BoxFit.cover,
-                errorWidget: (context, url, error) => Image(image: AssetImage("images/place_head.png")),
+                errorWidget: (context, url, error) =>
+                    Image(image: AssetImage("images/place_head.png")),
               ),
             ),
             decoration: BoxDecoration(
@@ -45,41 +62,78 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
             ),
           ),
         ),
-        Opacity(opacity: 0.7, child: Container(
-          margin: EdgeInsets.only(top: AdaptUI.rpx(12)),
-          width: AdaptUI.rpx(12),
-          height: AdaptUI.rpx(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: UIColor.fontLevel,
+        Opacity(
+          opacity: 0.7,
+          child: Container(
+            margin: EdgeInsets.only(top: AdaptUI.rpx(12)),
+            width: AdaptUI.rpx(12),
+            height: AdaptUI.rpx(12),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: UIColor.fontLevel,
+            ),
           ),
-        ),),
-        Opacity(opacity: 0.5, child: Container(
-          margin: EdgeInsets.only(top: AdaptUI.rpx(8)),
-          width: AdaptUI.rpx(10),
-          height: AdaptUI.rpx(10),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: UIColor.fontLevel,
+        ),
+        Opacity(
+          opacity: 0.5,
+          child: Container(
+            margin: EdgeInsets.only(top: AdaptUI.rpx(8)),
+            width: AdaptUI.rpx(10),
+            height: AdaptUI.rpx(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: UIColor.fontLevel,
+            ),
           ),
-        ),),
-        Opacity(opacity: 0.3, child: Container(
-          margin: EdgeInsets.only(top: AdaptUI.rpx(8)),
-          width: AdaptUI.rpx(8),
-          height: AdaptUI.rpx(8),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Color(0xffcc3399),
+        ),
+        Opacity(
+          opacity: 0.3,
+          child: Container(
+            margin: EdgeInsets.only(top: AdaptUI.rpx(8)),
+            width: AdaptUI.rpx(8),
+            height: AdaptUI.rpx(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xffcc3399),
+            ),
           ),
-        ),),
+        ),
         Container(
           margin: EdgeInsets.only(top: AdaptUI.rpx(10)),
           child: Text(
-            type == JJRoleType.matron ? YsLevel.getYuesaoLevel(level) : YsLevel.getYuyingLevel(level, type: careType),
-            style: TextStyle(fontSize: AdaptUI.rpx(28), fontWeight: FontWeight.w500, color: Color(0xffcc3399)),
+            type == JJRoleType.matron
+                ? YsLevel.getYuesaoLevel(level)
+                : YsLevel.getYuyingLevel(level, type: careType),
+            style: TextStyle(
+                fontSize: AdaptUI.rpx(28),
+                fontWeight: FontWeight.w500,
+                color: Color(0xffcc3399)),
           ),
         )
       ],
+    );
+  }
+
+  /* 催乳、摄影  无等级的 ，只有头像 */
+  Widget otherWidget() {
+    return Container(
+      width: AdaptUI.rpx(148),
+      height: AdaptUI.rpx(148),
+      child: ClipOval(
+        child: //headUrl == null || headUrl.isEmpty ? Image(image: AssetImage("images/place_head.png")) :
+            CachedNetworkImage(
+          placeholder: (context, url) =>
+              Image(image: AssetImage("images/place_head.png")),
+          imageUrl: headUrl,
+          fit: BoxFit.cover,
+          errorWidget: (context, url, error) =>
+              Image(image: AssetImage("images/place_head.png")),
+        ),
+      ),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: UIColor.hexEEE, width: 1),
+      ),
     );
   }
 }

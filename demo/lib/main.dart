@@ -14,6 +14,7 @@ void main() {
   final FluroRouter router = FluroRouter();
   PageRoutes.configFluroRoutes(router);
   App.router = router;
+  App.tabBarController = TabBarController();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => CorpData()),
@@ -30,11 +31,11 @@ class MyApp extends StatelessWidget {
       title: 'Material App',
       theme: ThemeData(primaryColor: UIColor.mainColor),
       /// debug标识
-      debugShowCheckedModeBanner: true,
+//      debugShowCheckedModeBanner: true,
       /// 网格调试
 //      debugShowMaterialGrid: true,
       /// 性能检测
-      showPerformanceOverlay: true,
+//      showPerformanceOverlay: true,
       onGenerateRoute: App.router.generator,
       builder: (context, child) {
         return Scaffold(
@@ -55,7 +56,7 @@ class MyApp extends StatelessWidget {
         // appBar: AppBar(
         //   title: Text('Material App Bar'),
         // ),
-        body: TabBarController(),
+        body: App.tabBarController,
       ),
     );
   }

@@ -9,11 +9,12 @@ class UIColor {
   
   static const Color mainColor = Color.fromRGBO(126, 27, 195, 1);
 
+  static const Color mainLight = Color(0xff9556bf);
+
   // 页面背景色f8
   static const Color pageColor = Color(0xfff8f8f8);
 
   // 字体颜色
-
   static const Color hex333 = Color(0xff333333);
 
   static const Color hex666 = Color(0xff666666);

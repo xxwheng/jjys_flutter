@@ -6,15 +6,19 @@ import 'package:demo/model/config_corp_bean.dart';
 import 'package:demo/model/config_yswork_bean.dart';
 import 'package:demo/model/corp_grop_bean.dart';
 import 'package:demo/model/home_bean.dart';
+import 'package:demo/model/order_index_bean.dart';
+import 'package:demo/model/order_ys_price.dart';
 import 'package:demo/model/ys_comment_list.dart';
 import 'package:demo/model/ys_detail_bean.dart';
 import 'package:demo/model/ys_list_bean.dart';
+import 'package:demo/model/ys_min_bean.dart';
 import 'package:demo/network/dio/http_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /* compute 解析 */
 
+/// 本地文件  省市区
 Future<List<CityBean>> parseLocalCityCompute() async {
   var value =  await rootBundle.loadString("lib/data/city.json");
   return compute(_parseLocalCity, value) ;
@@ -53,6 +57,15 @@ HomeBean _parseHomeBean(dynamic json) {
 
 Future<HomeBean> parseHomeBeanCompute(json) async {
   return compute(_parseHomeBean,json);
+}
+
+/// 订单列表
+Future<OrderListBean> parseOrderListCompute(value) async {
+  return compute(_parseOrderListBean,value);
+}
+
+OrderListBean _parseOrderListBean(dynamic json) {
+  return OrderListBean.fromJson(json);
 }
 
 /// 加盟商城市列表
@@ -129,4 +142,33 @@ List<String> _parseWorkShowList(dynamic json) {
 }
 Future<List<String>> parseWorkShowListCompute(json) async {
   return compute(_parseWorkShowList, json);
+}
+
+
+/// 订单月嫂信息 -- YuesaoViewMin
+Future<YsMinBean> parseOrderYsMinCompute(value) {
+  return compute(_parseOrderYsMinBean, value);
+}
+
+YsMinBean _parseOrderYsMinBean(dynamic json) {
+  return YsMinBean.fromJson(json);
+}
+
+/// 订单价格 -- OrderPrice
+Future<OrderYsPrice> parseYsOrderPrice(value) {
+  return compute(_parseYsOrderPrice, value);
+}
+
+OrderYsPrice _parseYsOrderPrice(dynamic json) {
+  return OrderYsPrice.fromJson(json);
+}
+
+
+/// 单字符串列表
+Future<List<String>> parseListStringCompute(value) {
+  return compute(_parseListString, value);
+}
+
+List<String> _parseListString(dynamic json) {
+  return (json as List)?.map((e) => e==null?null:e.toString())?.toList() ?? [];
 }

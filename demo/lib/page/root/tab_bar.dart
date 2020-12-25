@@ -2,12 +2,14 @@ import 'package:demo/page/article/page_article.dart';
 import 'package:demo/page/home/page_home.dart';
 import 'package:demo/page/mine/page_mine.dart';
 import 'package:demo/page/order/page_order.dart';
+import 'package:demo/page/root/app.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/color.dart';
 
 
 class TabBarController extends StatefulWidget {
+
   @override
   _TabBarControllerState createState() => _TabBarControllerState();
 }
@@ -19,6 +21,14 @@ class _TabBarControllerState extends State<TabBarController> {
   int _selectedIndex = 0;
 
   double alpha = 1.0;
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    App.switchIndex = _tabBarDidTap;
+  }
 
   void insertOverlayEntity() async {
     Future.delayed(Duration(seconds: 2), (){

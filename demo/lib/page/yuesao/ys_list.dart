@@ -39,7 +39,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
         PageDataSource<YsItemBean>,
         SingleTickerProviderStateMixin,
         MultiDataLine {
-
   final String keyList = "key_list";
 
   String _listOrder = "1";
@@ -134,7 +133,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     }).whenComplete(() {});
   }
 
-
   /* 点击进入月嫂详情 */
   void ysItemDidTap(YsItemBean item) {
     App.navigationTo(context, PageRoutes.ysDetailPage + '?id=${item.id}');
@@ -198,7 +196,6 @@ class _YuesaoListPageState extends State<YuesaoListPage>
     );
   }
 
-
   @override
   void dispose() {
     // TODO: implement dispose
@@ -245,6 +242,37 @@ class _YuesaoListPageState extends State<YuesaoListPage>
         indexArr.map((e) => this.configBean.levelYusaoArr[e]).toList();
   }
 
+  /// 籍贯picker
+  SinglePicker _regionPicker;
+
+  /* 籍贯选择 */
+  void filterRegionPickerDidTap(_) {
+    if (_regionPicker == null) {
+      _regionPicker = SinglePicker(
+          context, configBean.provinceYuesaoArr.map((e) => e.cityName).toList(),
+          (_, index) {
+        this.filterProvince = configBean.provinceYuesaoArr[index];
+        getLine<String>(keyRegion).setData(this.filterProvince.cityName);
+      });
+    }
+    _regionPicker.show();
+  }
+
+  /// 天数picker
+  SinglePicker _servicePicker;
+
+  /*服务天数选择*/
+  void serviceDayPickerDidTap(_) {
+    if (_servicePicker == null) {
+      _servicePicker = SinglePicker(
+          context, configBean.serviceDayArr.map((e) => e.toString()).toList(),
+          (day, _) {
+        this.dayBuy = day;
+        getLine<String>(keyDayBuy).setData(this.dayBuy);
+      });
+    }
+  }
+
   /* Sheet */
   showFilterSheet(BuildContext context) {
     showModalBottomSheet(
@@ -272,26 +300,13 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                       }, currentTime: DateTime.now(), locale: LocaleType.zh);
                     }),
                 YsFilterPickerRowWidget(
-                  height: AdaptUI.rpx(100),
-                  title: "服务天数",
-                  child: getLine<String>(keyDayBuy, initValue: this.dayBuy)
-                      .addObserver(
-                          builder: (context, data, _) =>
-                              YsFilterSlice.pickerText(data, "请选择服务天数")),
-                  tapAction: (tap) {
-                    SinglePicker(
-                        context: this.context,
-                        list: configBean.serviceDayArr
-                            .map((e) => e.toString())
-                            .toList(),
-                        itemChanged: (index) {
-                          this.dayBuy =
-                              configBean.serviceDayArr[index].toString();
-
-                          getLine<String>(keyDayBuy).setData(this.dayBuy);
-                        }).show();
-                  },
-                ),
+                    height: AdaptUI.rpx(100),
+                    title: "服务天数",
+                    child: getLine<String>(keyDayBuy, initValue: this.dayBuy)
+                        .addObserver(
+                            builder: (context, data, _) =>
+                                YsFilterSlice.pickerText(data, "请选择服务天数")),
+                    tapAction: serviceDayPickerDidTap),
                 Container(
                   padding: EdgeInsets.only(
                       left: AdaptUI.rpx(30),
@@ -375,17 +390,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
                   child: getLine<String>(keyRegion, initValue: "").addObserver(
                       builder: (context, data, _) =>
                           YsFilterSlice.pickerText(data, "请选择籍贯")),
-                  tapAction: (tap) => SinglePicker(
-                      context: this.context,
-                      list: configBean.provinceYuesaoArr
-                          .map((e) => e.cityName)
-                          .toList(),
-                      itemChanged: (index) {
-                        this.filterProvince =
-                            configBean.provinceYuesaoArr[index];
-                        getLine<String>(keyRegion)
-                            .setData(this.filterProvince.cityName);
-                      }).show(),
+                  tapAction: filterRegionPickerDidTap,
                 ),
                 Container(
                   height: AdaptUI.rpx(150),

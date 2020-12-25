@@ -1,7 +1,9 @@
 
 import 'package:demo/common/common.dart';
+import 'package:demo/data/global_data.dart';
 import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/mine/ys_collect.dart';
+import 'package:demo/page/root/tab_bar.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'route_handles.dart';
@@ -9,13 +11,32 @@ import 'route_handles.dart';
 class App {
   static FluroRouter router;
 
+  static TabBarController tabBarController;
+
+  static void Function(int index) switchIndex;
+
   static Future navigationTo(BuildContext context, String path) {
     return router.navigateTo(context, path, transition: TransitionType.cupertino);
   }
 
   static void navigationToWeb(BuildContext context, String title, String path) async {
     String url = await WebUrlBridge.urlBridget(path);
+
     App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent(title)}&url=${Uri.encodeComponent(url)}",);
+  }
+
+  /* 跳转服务协议 */
+  static void navigationToProtocol(BuildContext context, JJRoleType type) {
+    switch (type) {
+      case JJRoleType.matron:
+        App.navigationToWeb(context, "服务协议", kUrlServerProtocolYs);
+        break;
+      case JJRoleType.nurse:
+        App.navigationToWeb(context, "服务协议", kUrlServerProtocolYy);
+        break;
+      default:
+        break;
+    }
   }
 
   /* 跳转商务通 */
@@ -25,6 +46,20 @@ class App {
 
   static void pop(BuildContext context) {
     Navigator.pop(context);
+  }
+
+  static void popToName(BuildContext context, String path) {
+    Navigator.popUntil(context, ModalRoute.withName(path));
+  }
+
+  /* 页面内手动切换tabBar */
+  static void switchTabBar(BuildContext context, int index) {
+    App.switchIndex(2);
+    App.popToRoot(context);
+  }
+  
+  static void popToRoot(BuildContext context) {
+    popToName(context, PageRoutes.tabBarController);
   }
 }
 
@@ -78,6 +113,7 @@ class PageRoutes {
     router.define(myCollect, handler: myCollectPageHandler);
     router.define(ysListPage, handler: ysListPageHandler);
     router.define(ysDetailPage, handler: ysDetailPageHandler);
+    router.define(ysOrderCommitPage, handler: ysOrderCommitHandler);
     router.define(ysWorkShowPage, handler: ysWorkShowHandler);
     router.define(yyListPage, handler: yuyingListPageHandler);
     router.define(corpListPage, handler: corpListPageHandler);

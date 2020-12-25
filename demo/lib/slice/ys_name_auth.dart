@@ -7,8 +7,9 @@ class YuesaoNameAuthWidget extends StatelessWidget {
 
   final String nickname;
   final bool isCredit;
+  final TextStyle style;
 
-  YuesaoNameAuthWidget({Key key, this.nickname, this.isCredit}): super(key: key);
+  YuesaoNameAuthWidget({Key key, this.nickname, this.isCredit, this.style}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class YuesaoNameAuthWidget extends StatelessWidget {
       children: [
         Text(
           nickname + "  ",
-          style: TextStyle(
+          style: style ?? TextStyle(
               fontSize: AdaptUI.rpx(32)),
         ),
         isCredit ? YsAuthWidget() : Offstage()

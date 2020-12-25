@@ -6,3 +6,9 @@ class XXDoubleTitleBean {
 
   XXDoubleTitleBean(this.num, this.title);
 }
+
+class XXIntTitleBean {
+  int num;
+  String title;
+  XXIntTitleBean(this.num, this.title);
+}

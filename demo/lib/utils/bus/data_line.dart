@@ -56,8 +56,8 @@ class SingleDataLine<T> {
     inner.add(model);
   }
 
-  void setData(T t) {
-    if (t == model.data) return;
+  void setData(T t, [bool isForce = false]) {
+    if (t == model.data && !isForce) return;
 
     if (_stream.isClosed) return;
 

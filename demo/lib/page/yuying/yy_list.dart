@@ -262,16 +262,18 @@ class _YuyingListPageState extends State<YuyingListPage>
     this.yearBean = this.yearFilterArray[index];
   }
 
+
+  /// 籍贯picker
+  SinglePicker _regionPicker;
   /* 籍贯选择 */
   void filterRegionPickerDidTap() {
-
-    SinglePicker(
-        context: this.context,
-        list: configBean.provinceYuyingArr.map((e) => e.cityName).toList(),
-        itemChanged: (index) {
-          this.filterProvince = configBean.provinceYuyingArr[index];
-          getLine<String>(keyRegion).setData(this.filterProvince.cityName);
-        }).show();
+    if (_regionPicker == null) {
+      _regionPicker = SinglePicker(context, configBean.provinceYuyingArr.map((e) => e.cityName).toList(), (_, index) {
+        this.filterProvince = configBean.provinceYuyingArr[index];
+        getLine<String>(keyRegion).setData(this.filterProvince.cityName);
+      });
+    }
+    _regionPicker.show();
   }
 
   /* Sheet */

@@ -11,8 +11,6 @@ import 'package:demo/model/ys_detail_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:demo/slice/comment_cell.dart';
-import 'package:demo/slice/heart_row.dart';
-import 'package:demo/slice/safe_bottom_control.dart';
 import 'package:demo/slice/ys_detail_bottom.dart';
 import 'package:demo/slice/ys_detail_cert_chart.dart';
 import 'package:demo/slice/ys_detail_header.dart';

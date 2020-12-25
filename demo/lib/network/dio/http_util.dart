@@ -51,11 +51,15 @@ class HttpUtil {
       _cancelTokenDic[cancelTag] ??= CancelToken();
       cancelToken = _cancelTokenDic[cancelTag];
     }
-
+    print(params.toString());
     try {
       var res = await _dio.request(path, data: data, options: options, queryParameters: params, cancelToken: cancelToken);
+      print(res);
       if (res.statusCode == HttpStatus.ok) {
+
         resolve(res.data);
+      } else {
+
       }
     } on DioError catch (error) {
       if (null != reject) {

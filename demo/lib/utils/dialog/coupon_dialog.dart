@@ -1,13 +1,13 @@
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
+import 'package:demo/data/global_define.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-typedef StringCallBack(String msg);
 
 /* 优惠券兑换弹窗 */
 class CouponDialog {
-  StringCallBack tapCallBack;
+  TDStringCallBack tapCallBack;
 
   TextEditingController _controller;
 

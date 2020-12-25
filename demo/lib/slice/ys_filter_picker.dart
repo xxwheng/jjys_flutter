@@ -13,6 +13,22 @@ class YsFilterSlice {
   }
 }
 
+/// 选择内容文本
+class YsPickerContentTextWidget extends StatelessWidget {
+
+  final String text;
+
+  final String placeholder;
+
+  YsPickerContentTextWidget({Key key, this.text, this.placeholder}): super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text==null||text.isEmpty?placeholder:text, style: TextStyle(fontSize: AdaptUI.rpx(30), color: text==null||text.isEmpty?UIColor.hex999:UIColor.hex333),);
+  }
+}
+
+
 /* 月嫂列表筛选 选择栏 */
 class YsFilterPickerRowWidget extends StatefulWidget {
   final double height;
