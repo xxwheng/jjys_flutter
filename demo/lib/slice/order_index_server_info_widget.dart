@@ -15,35 +15,56 @@ import 'package:flutter/material.dart';
 class OrderIndexServerInfoWidget extends StatelessWidget {
 
   final OrderIndexBean item;
-  OrderIndexServerInfoWidget({Key key, this.item}): super(key: key);
+  final VoidCallback keFuCall;
+
+  OrderIndexServerInfoWidget({Key key, this.item, this.keFuCall}): super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-          left: AdaptUI.rpx(30),
-          right: AdaptUI.rpx(30),
-          top: AdaptUI.rpx(30),
-          bottom: AdaptUI.rpx(30)),
-      decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _infoCaregiverHead(),
-          Expanded(
-            child: Container(
-              padding:
-              EdgeInsets.only(left: AdaptUI.rpx(30), top: AdaptUI.rpx(20)),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _orderServerInfoWidget(item)
-              ),
-            ),
+    return Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.only(
+              left: AdaptUI.rpx(30),
+              right: AdaptUI.rpx(30),
+              top: AdaptUI.rpx(30),
+              bottom: AdaptUI.rpx(30)),
+          decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: UIColor.hexEEE)),
           ),
-        ],
-      ),
-    );
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _infoCaregiverHead(),
+              Expanded(
+                child: Container(
+                  padding:
+                  EdgeInsets.only(left: AdaptUI.rpx(30), top: AdaptUI.rpx(20)),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _orderServerInfoWidget(item)
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          right: 0,
+          top: 0,
+          width: AdaptUI.rpx(120),
+          height: AdaptUI.rpx(120),
+          child: GestureDetector(
+            onTap: keFuCall,
+            child: Container(
+              child: Center(
+              child: Image.asset("images/ic_kefu_grey.png", fit: BoxFit.contain, width: AdaptUI.rpx(40), height: AdaptUI.rpx(40),),
+              ) ,
+            ) ,
+          ) ,
+        )
+      ],
+    ) ;
   }
 
   Widget  _infoCaregiverHead() {
@@ -51,8 +72,8 @@ class OrderIndexServerInfoWidget extends StatelessWidget {
       headUrl: item.infoOrder.serviceItem == '2' ? icCuiRu : item.infoCaregiver.icon,
       level: item.infoCaregiver.level,
       type: OrderDataTool.getOrderType(item.infoOrder.serviceItem,
-          isEmpty: item.caregiverServer.isEmpty),
-      careType: item.infoCaregiver.careType,
+          isEmpty: item.caregiverServer?.isEmpty),
+      careType: item.infoCaregiver?.careType,
     );
   }
 

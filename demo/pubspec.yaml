@@ -50,6 +50,9 @@ dependencies:
   # UI 布局尺寸
   adaptui:
     git: https://github.com/xxwheng/adaptui.git
+  # 支付
+  xx_pay:
+    git: https://github.com/xxwheng/xx_pay.git
   # 日志打印
   logger: ^0.9.4
   # 数据共享
@@ -71,6 +74,9 @@ dependencies:
   flutter_spinkit: ^4.1.2
   # 图片浏览
   photo_view: ^0.10.3
+  # 拨打电话
+  url_launcher: ^5.7.10
+  get_it: ^5.0.3
 
 dev_dependencies:
   flutter_test:
@@ -92,37 +98,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/tab_home_n.png
-    - images/tab_home_s.png
-    - images/tab_article_n.png
-    - images/tab_article_s.png
-    - images/tab_order_n.png
-    - images/tab_order_s.png
-    - images/tab_mine_n.png
-    - images/tab_mine_s.png
-    - images/arrow_next.png
-    - images/honour.png
-    - images/place_head.png
-    - images/ys_auth.png
-    - images/ys_heart.png
-    - images/ys_score.png
-    - images/ys_star.png
-    - images/coupon_late.png
-    - images/coupon_used.png
-    - images/coupon_line.png
-    - images/c_user_head.png
-    - images/ys_d_0.png
-    - images/ys_d_1.png
-    - images/ys_d_2.png
-    - images/ys_d_3.png
-    - images/ys_d_4.png
-    - images/ys_d_5.png
-    - images/like_0.png
-    - images/like_1.png
-    - images/ic_circle.png
-    - images/ic_circle_sel.png
-    - images/image01.jpg
     - lib/data/city.json
+    - images/
+
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -135,8 +114,8 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
+#  fonts:
+#    - family: AliIcons
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf

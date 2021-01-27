@@ -12,10 +12,10 @@ class YsChartWidget extends StatelessWidget {
   final List<double> values;
 
   /* 文本样式 */
-  final TextStyle _style = TextStyle(fontSize: AdaptUI.rpx(24), color: UIColor.hex999);
+  final TextStyle _style =
+      TextStyle(fontSize: AdaptUI.rpx(24), color: UIColor.hex999);
 
-  YsChartWidget({Key key, this.values})
-      : super(key: key);
+  YsChartWidget({Key key, this.values}) : super(key: key);
 
   /* 计算角度 */
   double angleSp(int i) {
@@ -32,13 +32,15 @@ class YsChartWidget extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              child: CustomPaint(
-                size: Size(size, size),
-                painter: YsChartPainter(
-                  values: values,
-                  width: size,
-                  fillColor: Color(0xffd0a1f1),
-                  beginPoint: 1,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  size: Size(size, size),
+                  painter: YsChartPainter(
+                    values: values,
+                    width: size,
+                    fillColor: Color(0xffd0a1f1),
+                    beginPoint: 1,
+                  ),
                 ),
               ),
             ),
@@ -150,7 +152,7 @@ class YsChartWidget extends StatelessWidget {
                 style: _style,
               )),
           Positioned(
-            bottom: 0,
+              bottom: 0,
               left: 0,
               right: 0,
               child: Text(
@@ -211,7 +213,6 @@ class YsChartPainter extends CustomPainter {
     this.drawBgPie(canvas, _pointsList);
     this.drawLines(canvas, _pointsList);
     this.drawValuePie(canvas);
-
   }
 
   // 背景16边型
@@ -243,7 +244,7 @@ class YsChartPainter extends CustomPainter {
   // 能力值图
   void drawValuePie(Canvas canvas) {
     _paint.style = PaintingStyle.fill;
-    _paint.color = Color.fromARGB(200, 255, 192, 1);//Color(0xaaccdd00);
+    _paint.color = Color.fromARGB(200, 255, 192, 1); //Color(0xaaccdd00);
     var _valuePath = Path();
     _valuePath.moveTo(_r, _r - _r * values[0]);
     var valuePointList = this.circleSideValuePoints();
@@ -257,7 +258,8 @@ class YsChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     // TODO: implement shouldRepaint
-    return false;
+    // 由于动画需要重绘，所以返true。避免重绘，交由RepaintBoundary处理。你也可以判断动画是否执行完成来处理时候重绘
+    return true;
   }
 
   /* 边上顶点列表

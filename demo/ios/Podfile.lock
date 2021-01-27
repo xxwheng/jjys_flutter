@@ -1,4 +1,5 @@
 PODS:
+  - AlipaySDK-iOS (15.7.9)
   - Flutter (1.0.0)
   - flutter_native_image (0.0.1):
     - Flutter
@@ -17,9 +18,16 @@ PODS:
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
+  - SwiftyJSON (5.0.0)
   - Toast (4.0.0)
+  - url_launcher (0.0.1):
+    - Flutter
   - webview_flutter (0.0.1):
     - Flutter
+  - xx_pay (0.0.1):
+    - AlipaySDK-iOS
+    - Flutter
+    - SwiftyJSON
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -29,11 +37,15 @@ DEPENDENCIES:
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
   - webview_flutter (from `.symlinks/plugins/webview_flutter/ios`)
+  - xx_pay (from `.symlinks/plugins/xx_pay/ios`)
 
 SPEC REPOS:
   trunk:
+    - AlipaySDK-iOS
     - FMDB
+    - SwiftyJSON
     - Toast
 
 EXTERNAL SOURCES:
@@ -51,10 +63,15 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
   webview_flutter:
     :path: ".symlinks/plugins/webview_flutter/ios"
+  xx_pay:
+    :path: ".symlinks/plugins/xx_pay/ios"
 
 SPEC CHECKSUMS:
+  AlipaySDK-iOS: 94ff4c0e17c5e7d126b8207596d5033006534c25
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_native_image: 9c0b7451838484458e5b0fae007b86a4c2d4bdfe
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
@@ -63,9 +80,12 @@ SPEC CHECKSUMS:
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
+  url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   webview_flutter: d2b4d6c66968ad042ad94cbb791f5b72b4678a96
+  xx_pay: 7edac58e4deb6f93c58a5e0a50472e3433559b5f
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: 09fa0da4bae6e9bf5d7b46affff90917dfa2c521
 
 COCOAPODS: 1.9.3

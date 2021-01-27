@@ -64,7 +64,7 @@ class _OrderContactYsWidgetState extends State<OrderContactYsWidget> {
       widget.getTown = town;
 
       var areaInfo = _data.searchPCTItemFromCode(province, city, town);
-      _areaController.text = areaInfo.map((e) => e.cityName).toList().join("  ");
+      _areaController.text = areaInfo.map((e) => e.cityName).toList().join("   ");
     });
   }
 

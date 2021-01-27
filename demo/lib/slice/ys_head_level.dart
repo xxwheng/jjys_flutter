@@ -50,7 +50,7 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
                   CachedNetworkImage(
                 placeholder: (context, url) =>
                     Image(image: AssetImage("images/place_head.png")),
-                imageUrl: headUrl,
+                imageUrl: headUrl ?? '',
                 fit: BoxFit.cover,
                 errorWidget: (context, url, error) =>
                     Image(image: AssetImage("images/place_head.png")),
@@ -62,41 +62,32 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
             ),
           ),
         ),
-        Opacity(
-          opacity: 0.7,
-          child: Container(
+        Container(
             margin: EdgeInsets.only(top: AdaptUI.rpx(12)),
             width: AdaptUI.rpx(12),
             height: AdaptUI.rpx(12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: UIColor.fontLevel,
+              color: Color(0xB2cc3399),
             ),
-          ),
         ),
-        Opacity(
-          opacity: 0.5,
-          child: Container(
+         Container(
             margin: EdgeInsets.only(top: AdaptUI.rpx(8)),
             width: AdaptUI.rpx(10),
             height: AdaptUI.rpx(10),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: UIColor.fontLevel,
+              color: Color(0x7fcc3399),
             ),
-          ),
         ),
-        Opacity(
-          opacity: 0.3,
-          child: Container(
+        Container(
             margin: EdgeInsets.only(top: AdaptUI.rpx(8)),
             width: AdaptUI.rpx(8),
             height: AdaptUI.rpx(8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xffcc3399),
+              color: Color(0x4ccc3399),
             ),
-          ),
         ),
         Container(
           margin: EdgeInsets.only(top: AdaptUI.rpx(10)),
@@ -114,7 +105,7 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
     );
   }
 
-  /* 催乳、摄影  无等级的 ，只有头像 */
+  /* 催乳、摄影、短单   无技师 无等级的 ，只有头像 */
   Widget otherWidget() {
     return Container(
       width: AdaptUI.rpx(148),
@@ -124,7 +115,7 @@ class YuesaoHeadLevelWidget extends StatelessWidget {
             CachedNetworkImage(
           placeholder: (context, url) =>
               Image(image: AssetImage("images/place_head.png")),
-          imageUrl: headUrl,
+          imageUrl: headUrl ?? '',
           fit: BoxFit.cover,
           errorWidget: (context, url, error) =>
               Image(image: AssetImage("images/place_head.png")),

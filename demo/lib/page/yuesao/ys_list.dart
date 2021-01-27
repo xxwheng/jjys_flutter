@@ -144,6 +144,7 @@ class _YuesaoListPageState extends State<YuesaoListPage>
       appBar: AppBar(
         title: Text("找月嫂"),
         elevation: 0,
+        centerTitle: true,
       ),
       body: Column(children: [
         FilterNavWidget(

@@ -5,6 +5,8 @@ import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/model/article_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/slice/article_widget.dart';
+import 'package:demo/utils/bus/data_bus.dart';
+import 'package:demo/utils/bus/data_line.dart';
 import 'package:flutter/material.dart';
 
 /// 文章 分页
@@ -18,11 +20,19 @@ class ArticleTabBarView extends StatefulWidget {
 }
 
 class _ArticleTabBarViewState extends State<ArticleTabBarView>
-    with PageDataSource<ArticleBean> {
+    with PageDataSource<ArticleBean>, MultiDataLine, AutomaticKeepAliveClientMixin {
+  String key;
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    key = widget.categoryId + "_key";
+    getLine<bool>(key).onLoading();
     onRefresh();
   }
 
@@ -42,7 +52,9 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
       var page = int.parse(res['page'].toString());
       var total = int.parse(res['total'].toString());
       addList(articleList, page, total);
+      getLine<bool>(key).setData(true, true);
     }).catchError((err) {
+      getLine<bool>(key).setState(LineState.failure);
       this.endRefreshing(status: false);
     });
   }
@@ -52,19 +64,31 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
     return Container(
       padding: EdgeInsets.only(top: AdaptUI.rpx(10), bottom: AdaptUI.rpx(40)),
       color: Colors.white,
-      child: PageRefreshWidget(
-        pageDataSource: this,
-        child: ListView.builder(
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-          ArticleBean item = list[index];
-          return ArticleWidget(
-            imageUrl: item.image,
-            title: item.title,
-            desc: item.desc,
-          );
-        }),
-      ),
+      child: getLine<bool>(key)
+          .addObserver(builder: (ctx, _, __) => _getRefreshWidget()),
     );
+  }
+
+  Widget _getRefreshWidget() {
+    return PageRefreshWidget(
+      pageDataSource: this,
+      child: ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (context, index) {
+            ArticleBean item = list[index];
+            return ArticleWidget(
+              imageUrl: item.image,
+              title: item.title,
+              desc: item.desc,
+            );
+          }),
+    );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    dataBusDispose();
+    super.dispose();
   }
 }

@@ -4,14 +4,20 @@ import 'package:logger/logger.dart';
 
 var logger = Logger();
 
+
+
+
+
+///  ------  固定网页地址
+
 /* 登录 注册协议 */
 final String kUrlRegisterProtocol = HttpConfig.webUrl + "/html/registerProtocol.html";
 
 /* 月嫂服务协议 */
-final String kUrlServerProtocolYs = HttpConfig.webUrl + "/protocol_yuezi.html";
+final String kUrlServerProtocolYs = HttpConfig.webUrl + "/html/protocol_yuezi.html";
 
 /* 育婴师服务协议 */
-final String kUrlServerProtocolYy = HttpConfig.webUrl + "/protocol_yuying.html";
+final String kUrlServerProtocolYy = HttpConfig.webUrl + "/html/protocol_yuying.html";
 
 /* 优惠券使用规则 */
 final String kUrlCouponRule = HttpConfig.webUrl + "/html/coupon_rule.html";
@@ -21,6 +27,9 @@ final String kAuthInfoYueSao = HttpConfig.webUrl + "/html/approveinfo.html?yuesa
 
 /* 月嫂服务内容 */
 final String kYueSaoServiceInfo = HttpConfig.webUrl + "/html/serviceinfo.html?level=";
+
+/* 短期护理 */
+final String kShortServiceUrl = HttpConfig.webUrl + "/html/short_term_service.html";
 
 /* 催乳订单头像 */
 final String icCuiRu = "https://static.jjys168.com/didiyuesao/weixin/static/images/cuiru.png";

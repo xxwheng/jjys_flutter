@@ -27,6 +27,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:provider/provider.dart';
+import 'package:xx_pay/xx_pay.dart';
 import '../../common/color.dart';
 import '../../model/home_bean.dart';
 import '../../template/home/menu_scroll.dart';
@@ -56,13 +57,13 @@ class _PageHomeState extends State<PageHome>
     super.initState();
     getLine<int>(key).onLoading();
     this.onRefresh();
-    eventBus.on(kCorpChanged, (arg) { this.onRefresh(); });
+    eventBus.on(EventBusKey.corpChanged, (arg) { this.onRefresh(); });
   }
 
   /// 加盟商切换
   void corpChooseDidTap() {
     App.navigationTo(context, PageRoutes.corpListPage).then((value) {
-      eventBus.emit(kCorpChanged);
+      eventBus.emit(EventBusKey.corpChanged);
     });
   }
 
@@ -73,14 +74,23 @@ class _PageHomeState extends State<PageHome>
 
   /// 菜单按钮点击
   void menuItemDidTap(HomeMenuBean bean) {
+//    String str = "app_id=2018053160301392&format=JSON&charset=utf-8&sign_type=RSA2&version=1.0&return_url=https%3A%2F%2Fm.t.jjys168.com%2Fhtml%2Fmyorderlist.html&notify_url=https%3A%2F%2Fm.t.jjys168.com%2Fa%2FAlipay_notify.html&timestamp=2021-01-26+16%3A53%3A45&biz_content=%7B%22out_trade_no%22%3A%22e_1_mysql_3168%22%2C%22subject%22%3A%22%5Cu4f4f%5Cu5bb6%5Cu6708%5Cu5b50%5Cu670d%5Cu52a1%2826%5Cu5929%29%22%2C%22total_amount%22%3A%220.01%22%2C%22product_code%22%3A%22QUICK_MSECURITY_PAY%22%7D&method=alipay.trade.app.pay&sign=JWLpqYsKki4vtuUEy%2Fr4JwYa1JuzRk%2FfDSHq%2FLQbGOwYFWOA0Dni8njOuswf3N6JWmi8vcxtoyuWgNPWuAjAuGCycgefkESw6VskMC58fQEYO6eqohoUPPTBEDrN8SldtJv6zySB8JRw%2FWJ41ROc%2BWz7DnExrN5x7bzPNBFcvVhONGg43LfmspVGFzUJYZD%2BPN3JRFZtuC29taWZfqgGN%2BN6VN3oa%2B91zEXjLMEx88PrGwFuo7nLWDsHbuPipYHp2hGbPWF06p%2FwXDx7lwasLtKJ6V2keqc59ULvja16z4XCEiV33ZNEEm5HIY2XRUS8LQnFv8Kpu5cyV2%2F%2BMSh%2Ffw%3D%3D";
+//    XxPay.aliPay(str, "schemeAliPay").then((value) {
+//      logger.i(value.message);
+//    });
+//    return;
     switch (bean.id.toString()) {
       case "1":
         App.navigationTo(context, PageRoutes.ysListPage);
+        break;
+      case "2":
+        App.navigationTo(context, PageRoutes.shortOrderCommitPage);
         break;
       case "4":
         App.navigationTo(context, PageRoutes.yyListPage);
         break;
       default:
+        App.navigationTo(context, PageRoutes.ysOrderPayPage + "?id=2125");
         break;
     }
   }
@@ -372,6 +382,7 @@ class _PageHomeState extends State<PageHome>
   @override
   void dispose() {
     // TODO: implement dispose
+    eventBus.off(EventBusKey.corpChanged);
     dataBusDispose();
     super.dispose();
   }

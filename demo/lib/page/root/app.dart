@@ -21,7 +21,6 @@ class App {
 
   static void navigationToWeb(BuildContext context, String title, String path) async {
     String url = await WebUrlBridge.urlBridget(path);
-
     App.navigationTo(context, PageRoutes.singleWebPage+"?title=${Uri.encodeComponent(title)}&url=${Uri.encodeComponent(url)}",);
   }
 
@@ -79,6 +78,12 @@ class PageRoutes {
   /* 育婴师列表 */
   static String yyListPage = "/page/yuying/yy_list";
 
+  /* 短期护理 */
+  static String shortServicePage = "/page/menu/short_service_page";
+  
+  /* 短单提交 */
+  static String shortOrderCommitPage = "/page/order/order_short_commit";
+
   /* 月嫂详情 */
   static String ysDetailPage = "/page/yuesao/ys_detail";
 
@@ -106,12 +111,20 @@ class PageRoutes {
   /* 月嫂提交订单 */
   static String ysOrderCommitPage = "/page/order/order_ys_commit";
 
+  /* 月嫂订单支付 */
+  static String ysOrderPayPage = "/page/order/order_ys_pay";
+
+  /* 订单详情 */
+  static String orderDetailPage = "/page/order/order_detail";
+
 
   static void configFluroRoutes(FluroRouter router) {
     router.define(tabBarController, handler: tabBarHandler);
     router.define(searchArticle, handler: searchArticleHandler);
     router.define(myCollect, handler: myCollectPageHandler);
     router.define(ysListPage, handler: ysListPageHandler);
+    router.define(shortServicePage, handler: shortServiceHandler);
+    router.define(shortOrderCommitPage, handler: shortOrderCommitHandler);
     router.define(ysDetailPage, handler: ysDetailPageHandler);
     router.define(ysOrderCommitPage, handler: ysOrderCommitHandler);
     router.define(ysWorkShowPage, handler: ysWorkShowHandler);
@@ -122,5 +135,7 @@ class PageRoutes {
     router.define(myCouponPage, handler: myCouponPageHandler);
     router.define(myInfoPage, handler: myInfoPageHandler);
     router.define(myInfoNickNamePage, handler: myInfoNickNameHandler);
+    router.define(ysOrderPayPage, handler: ysOrderPayHandler);
+    router.define(orderDetailPage, handler: orderDetailHandler);
   }
 }

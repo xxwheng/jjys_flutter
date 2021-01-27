@@ -1,24 +1,23 @@
-import 'dart:math';
-
 import 'package:adaptui/adaptui.dart';
 import 'package:demo/common/color.dart';
 import 'package:demo/common/common.dart';
-import 'package:demo/components/empty/error_page.dart';
-import 'package:demo/components/empty/loading_page.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/data/bean_compute.dart';
 import 'package:demo/data/corp_data.dart';
+import 'package:demo/data/key_event_bus.dart';
 import 'package:demo/data/order_data.dart';
 import 'package:demo/model/order_index_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/page/root/app.dart';
 import 'package:demo/slice/order_index_server_info_widget.dart';
 import 'package:demo/slice/row_spaceBetween_widget.dart';
-import 'package:demo/slice/ys_detail_header.dart';
-import 'package:demo/slice/ys_head_level.dart';
-import 'package:demo/slice/ys_name_auth.dart';
 import 'package:demo/utils/bus/data_bus.dart';
 import 'package:demo/utils/bus/data_line.dart';
+import 'package:demo/utils/bus/event_bus.dart';
+import 'package:demo/utils/dialog/order_call_alert.dart';
+import 'package:demo/utils/dialog/xx_alert_util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -38,6 +37,32 @@ class _PageOrderState extends State<PageOrder>
     super.initState();
     getLine<bool>(key).onLoading();
     onRefresh();
+    
+    eventBus.on(EventBusKey.orderListRefresh, (arg) {
+      this.onRefresh();
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    eventBus.off(EventBusKey.orderListRefresh);
+    dataBusDispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    logger.i(context.widget);
+  }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
+    logger.i("deactivate");
   }
 
   @override
@@ -60,6 +85,42 @@ class _PageOrderState extends State<PageOrder>
     });
   }
 
+  /* 拨打客服电话 */
+  void keFuDidCall(OrderIndexBean item) {
+    OrderCallAlert.show(context, item.infoOrder.contact);
+  }
+
+  /* 订单控制按钮点击响应 */
+  void orderControlAction(OrderBtsType type, OrderIndexBean item) {
+    print(type);
+    switch (type) {
+      case OrderBtsType.cancel:
+        XXAlertUtil.defaultShow(context, "确认取消该订单?").then((value) {
+          if (value) {
+            this.cancelOrderAction(item.infoOrder.id);
+          }
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  /* 取消订单请求 */
+  void cancelOrderAction(String id) {
+    XXNetwork.shared.post(params: {
+      "methodName": "OrderPayCancel",
+      "order_id": id
+    }).then((value) {
+      this.onRefresh();
+    });
+  }
+
+  /* 跳转订单详情*/
+  void gotoOrderDetail(OrderIndexBean bean) {
+    App.navigationTo(context, PageRoutes.orderDetailPage + "?id=" + bean.infoOrder.id);
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,17 +144,20 @@ class _PageOrderState extends State<PageOrder>
           itemCount: list.length,
           itemBuilder: (ctx, index) {
             var item = list[index];
-            return Container(
-              margin: EdgeInsets.only(top: AdaptUI.rpx(30)),
-              color: Colors.white,
-              child: Column(
-                children: [
-                  _orderHeader(item.infoOrder),
-                  _serverInfoWidget(item),
-                  _controlWidget(item)
-                ],
+            return GestureDetector(
+              onTapUp: (_) => this.gotoOrderDetail(item),
+              child: Container(
+                margin: EdgeInsets.only(bottom: AdaptUI.rpx(30)),
+                color: Colors.white,
+                child: Column(
+                  children: [
+                    _orderHeader(item.infoOrder),
+                    _serverInfoWidget(item),
+                    _controlWidget(item)
+                  ],
+                ),
               ),
-            );
+            ) ;
           }),
     );
   }
@@ -113,13 +177,32 @@ class _PageOrderState extends State<PageOrder>
                   fontSize: AdaptUI.rpx(30), color: UIColor.fontLevel))
         ]),
       ),
-      right: Row(),
+      right: Row(
+        children: item.ctrlBts.map((e) {
+          return GestureDetector(
+            child: Container(
+              height: AdaptUI.rpx(60),
+              decoration: BoxDecoration(
+                  border: Border.all(color: e.border, width: 0.7),
+                  borderRadius: BorderRadius.all(Radius.circular(100))
+              ),
+              margin: EdgeInsets.only(left: AdaptUI.rpx(20)),
+              padding: EdgeInsets.only(left: AdaptUI.rpx(25), right: AdaptUI.rpx(25)),
+              child: Center(child: Text(e.title, style: TextStyle(fontSize: AdaptUI.rpx(28), color: e.color)),) ,
+            ),
+            onTap: () => this.orderControlAction(e.type, item),
+          ) ;
+        }).toList(),
+      ),
     );
   }
 
   /* 服务信息 月嫂 金额 预产期 */
   Widget _serverInfoWidget(OrderIndexBean item) {
-    return OrderIndexServerInfoWidget(item: item);
+    return OrderIndexServerInfoWidget(
+      item: item,
+      keFuCall: () => this.keFuDidCall(item),
+    );
   }
 
   /* 头部 状态 订单编号 */
@@ -128,7 +211,10 @@ class _PageOrderState extends State<PageOrder>
       children: [
         RowSpaceBetweenWidget(
           left: Text(item.title),
-          right: Text(OrderDataTool.getStatusText(item.process)),
+          right: Text(
+            OrderDataTool.getStatusText(item.process),
+            style: TextStyle(color: UIColor.fontLevel),
+          ),
         ),
         RowSpaceBetweenWidget(
           left: Text("订单编号"),

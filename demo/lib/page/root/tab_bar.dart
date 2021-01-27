@@ -14,7 +14,7 @@ class TabBarController extends StatefulWidget {
   _TabBarControllerState createState() => _TabBarControllerState();
 }
 
-class _TabBarControllerState extends State<TabBarController> {
+class _TabBarControllerState extends State<TabBarController> with WidgetsBindingObserver {
 
   final List<Widget> _tabPagesList = [PageHome(), PageArticle(), PageOrder(), PageMine()];
 
@@ -26,8 +26,16 @@ class _TabBarControllerState extends State<TabBarController> {
   @override
   void initState() {
     // TODO: implement initState
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
     App.switchIndex = _tabBarDidTap;
+  }
+
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
   }
 
   void insertOverlayEntity() async {
@@ -58,7 +66,6 @@ class _TabBarControllerState extends State<TabBarController> {
   }
 
   void _tabBarDidTap(index) {
-    print(index);
     setState(() {
       _selectedIndex = index;
     });
@@ -84,11 +91,20 @@ class _TabBarControllerState extends State<TabBarController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
+      body:
+//      _tabPagesList[_selectedIndex],
+      IndexedStack(
         index: _selectedIndex,
         children: _tabPagesList,
       ),
       bottomNavigationBar: createTabBar(),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

@@ -9,12 +9,13 @@ import 'package:demo/slice/ys_wrap_filter.dart';
 import 'package:demo/utils/bus/data_bus.dart';
 import 'package:demo/utils/dialog/coupon_dialog.dart';
 import 'package:demo/utils/single_picker.dart';
+import 'package:demo/utils/v_toast.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 /// 订单提交-服务信息
-class OrderServerYsWidget extends StatefulWidget {
+class OrderServerShortWidget extends StatefulWidget {
 
   final List<String> serviceDayArr;
 
@@ -26,13 +27,13 @@ class OrderServerYsWidget extends StatefulWidget {
 
   final VoidCallback onShortTap;
 
-  OrderServerYsWidget({Key key, this.serviceDayArr, this.onServiceDayCallBack, this.onBabyNumCallBack, this.onPreDateCallBack, this.onShortTap}): super(key: key);
+  OrderServerShortWidget({Key key, this.serviceDayArr, this.onServiceDayCallBack, this.onBabyNumCallBack, this.onPreDateCallBack, this.onShortTap}): super(key: key);
 
   @override
-  _OrderServerYsWidgetState createState() => _OrderServerYsWidgetState();
+  _OrderServerShortWidgetState createState() => _OrderServerShortWidgetState();
 }
 
-class _OrderServerYsWidgetState extends State<OrderServerYsWidget>
+class _OrderServerShortWidgetState extends State<OrderServerShortWidget>
     with MultiDataLine {
   /// 预产期key
   final String keyPre = "pre_day";
@@ -43,6 +44,9 @@ class _OrderServerYsWidgetState extends State<OrderServerYsWidget>
   /// 服务天数
   SinglePicker _picker;
 
+  double _dayValue;
+
+
   final List<XXIntTitleBean> _babyArr = gBabyArray;
 
   final TapGestureRecognizer _tapGestureRecognizer = TapGestureRecognizer();
@@ -51,14 +55,24 @@ class _OrderServerYsWidgetState extends State<OrderServerYsWidget>
   void initState() {
     // TODO: implement initState
     super.initState();
+    _dayValue = double.parse(widget.serviceDayArr.first ?? '1') ?? 1;
     _picker = SinglePicker(context, widget.serviceDayArr, (value, _) {
-        getLine<String>(keyServer).setData(value);
-        widget.onServiceDayCallBack(value);
+      _dayValue = double.parse(value);
+      getLine<String>(keyServer).setData(value);
+      widget.onServiceDayCallBack(value);
     });
     _tapGestureRecognizer.onTap = widget.onShortTap;
   }
 
-
+  // 点击增加0.5天
+  void serverDayAddHalf(tap) {
+    if (_dayValue <= 25) {
+      _dayValue = _dayValue + 0.5;
+      getLine<String>(keyServer).setData(_dayValue.toString());
+    } else {
+      VToast.show("短单少于26天");
+    }
+  }
 
   // 服务天数点击筛选
   void serverDayDidTap(_) {
@@ -89,9 +103,9 @@ class _OrderServerYsWidgetState extends State<OrderServerYsWidget>
           title: "预产期",
           child: getLine<String>(keyPre, initValue: _dateStr).addObserver(
               builder: (ctx, date, _) => YsPickerContentTextWidget(
-                    text: _dateStr,
-                    placeholder: "请选择您的预产期",
-                  )),
+                text: _dateStr,
+                placeholder: "请选择您的预产期",
+              )),
           tapAction: preDayDidTap,
         ),
         YsFilterPickerRowWidget(
@@ -117,26 +131,43 @@ class _OrderServerYsWidgetState extends State<OrderServerYsWidget>
             },
           ),
         ),
-        YsFilterPickerRowWidget(
-          height: AdaptUI.rpx(110),
-          title: "服务天数",
-          child: getLine<String>(keyServer, initValue: widget.serviceDayArr.first ?? '').addObserver(
-              builder: (ctx, day, _) => YsPickerContentTextWidget(
-                text: day,
-                placeholder: "请选择服务天数",
-              )),
-          tapAction: serverDayDidTap,
+        Row(
+          children: [
+            Container(
+              width: AdaptUI.rpx(600),
+              child: YsFilterPickerRowWidget(
+                height: AdaptUI.rpx(110),
+                title: "服务天数",
+                child: getLine<String>(keyServer, initValue: widget.serviceDayArr.first ?? '').addObserver(
+                    builder: (ctx, day, _) => YsPickerContentTextWidget(
+                      text: day,
+                      placeholder: "请选择服务天数",
+                    )),
+                tapAction: serverDayDidTap,
+              ),
+            )
+            ,
+            GestureDetector(
+              onTapUp: this.serverDayAddHalf,
+              child: Container(
+                width: AdaptUI.rpx(110),
+                height: AdaptUI.rpx(70),
+                color: UIColor.mainLight,
+                child: Center(child: Text("+0.5天", textAlign: TextAlign.center, style: TextStyle(color: Colors.white),),) ,
+              ),
+            )
+          ],
         ),
         Container(
           padding: EdgeInsets.fromLTRB(AdaptUI.rpx(30), AdaptUI.rpx(20), AdaptUI.rpx(30), AdaptUI.rpx(30)),
           color: Colors.white,
           child: RichText(
             text: TextSpan(
-              children: [
-                TextSpan(text: "注:可输入26及以上的任意天数，25天及以下天数请从", style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(26))),
-                TextSpan(text: "短期月子护理", style: TextStyle(color: UIColor.mainColor, fontSize: AdaptUI.rpx(26)), recognizer: _tapGestureRecognizer),
-                TextSpan(text: "中预约", style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(26))),
-              ]
+                children: [
+                  TextSpan(text: "注:可选择1-25天之间的天数,26天及以上天数请从", style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(26))),
+                  TextSpan(text: "找月嫂", style: TextStyle(color: UIColor.mainColor, fontSize: AdaptUI.rpx(26)), recognizer: _tapGestureRecognizer),
+                  TextSpan(text: "中下单,价格更优惠哦~", style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(26))),
+                ]
             ),
           ),
         )

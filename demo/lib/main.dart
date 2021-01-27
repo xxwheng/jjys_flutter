@@ -24,6 +24,7 @@ void main() {
   ));
 }
 
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
 //      debugShowMaterialGrid: true,
       /// 性能检测
 //      showPerformanceOverlay: true,
+
       onGenerateRoute: App.router.generator,
       builder: (context, child) {
         return Scaffold(

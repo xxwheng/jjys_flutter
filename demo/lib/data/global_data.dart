@@ -1,14 +1,27 @@
-/* 角色 类型*/
+
 import 'package:demo/model/xx_int_title.dart';
 import 'package:demo/model/year_filter_bean.dart';
 import 'package:demo/network/dio/http_error.dart';
 import 'package:demo/network/manager/xx_network.dart';
 
+
+/* 支付方式 */
+enum JJPayType {
+  aliPay,
+  wxPay
+}
+
+JJPayType jjPayType(int value) {
+  return JJPayType.values.firstWhere((element) => element.index == value);
+}
+
+/* 角色 类型*/
 enum JJRoleType {
   unknown,
   matron,
   nurse,
   cuiRu,
+  shortMatron,
   other
 }
 
@@ -45,6 +58,7 @@ final List<YuyingFilterCareTypeBean> gCareTypeFilterArray = _gCareTypeTitleArr
     .toList();
 
 
+/// 全局 网络请求
 class GlobalNet {
   static Future orderCheckUnpay() {
     return XXNetwork.shared.post(params: {"methodName":"OrderCheckUnpay"}).then((value) {

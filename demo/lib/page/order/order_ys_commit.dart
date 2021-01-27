@@ -3,6 +3,7 @@ import 'package:demo/common/color.dart';
 import 'package:demo/common/common.dart';
 import 'package:demo/data/bean_compute.dart';
 import 'package:demo/data/global_data.dart';
+import 'package:demo/data/key_event_bus.dart';
 import 'package:demo/model/order_ys_price.dart';
 import 'package:demo/model/ys_min_bean.dart';
 import 'package:demo/network/dio/http_error.dart';
@@ -13,6 +14,7 @@ import 'package:demo/slice/order_server_ys.dart';
 import 'package:demo/slice/ys_head_level.dart';
 import 'package:demo/slice/ys_name_auth.dart';
 import 'package:demo/utils/bus/data_bus.dart';
+import 'package:demo/utils/bus/event_bus.dart';
 import 'package:demo/utils/verify_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -30,6 +32,7 @@ class OrderYsCommitPage extends StatefulWidget {
 class _OrderYsCommitPageState extends State<OrderYsCommitPage>
     with MultiDataLine {
   final String key = "viewKey";
+  final String priceKey = "orderPrice";
 
   YsMinBean _ysMinBean;
   OrderPrice _orderPrice;
@@ -65,8 +68,8 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
       XXNetwork.shared.post(params: {
         "methodName": "OrderPrice",
         "yuesao_id": widget.id,
-        "service_days": 26,
-        "num": 1
+        "service_days": _serviceDay,
+        "num": _num
       }),
       XXNetwork().post(params: {"methodName": "ConfigServiceDay"})
     ]).then((valueArr) {
@@ -80,9 +83,25 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
       _orderPrice = (resArr[1] as OrderYsPrice).orderPrice;
       _serviceDayList = resArr[2];
       getLine<YsMinBean>(key).setData(_ysMinBean);
+      getLine<OrderPrice>(priceKey).setData(_orderPrice, true);
     }).catchError((err) {
       logger.i(err);
       getLine<YsMinBean>(key).onFailure();
+    });
+  }
+
+  /* 服务天数 宝宝数量 更新订单金额 */
+  void changeOrderPrice() {
+    XXNetwork.shared.post(params: {
+      "methodName": "OrderPrice",
+      "yuesao_id": widget.id,
+      "service_days": _serviceDay,
+      "num": _num
+    }).then((value) {
+      return parseYsOrderPrice(value);
+    }).then((res) {
+      _orderPrice = res.orderPrice;
+      getLine<OrderPrice>(priceKey).setData(_orderPrice, true);
     });
   }
 
@@ -97,7 +116,18 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
       ToastRow(_isProtocolTrue, "请先阅读并同意服务协议")
     ];
   }
-  
+
+  /* 切换预产期 检查档期 */
+  void checkSchedule() {
+    XXNetwork.shared.post(params: {
+      "methodName":"OrderScheduteCheck",
+      "predict_day":_preDateStamp,
+      "product_id":_orderPrice.productId,
+      "yuesao_id":_ysMinBean.id,
+      "days":_serviceDay,
+    }).then((value) => null);
+  }
+
 
 
   /* 提交订单按钮  检测是否有未付款订单 --> 添加地址 --> 下单 */
@@ -134,7 +164,10 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
         "refer_id": "",
       });
     }).then((res) {
-      /// 提交订单成功
+      /// 提交订单成功 --> 去支付页
+      eventBus.emit(EventBusKey.orderListRefresh);
+      var id = res['id'].toString();
+      App.navigationTo(context, PageRoutes.ysOrderPayPage + "?id=$id");
     }).catchError((err) {
       print("异常");
       print(err);
@@ -170,7 +203,10 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
         centerTitle: true,
         elevation: 0,
       ),
-      body: getLine<YsMinBean>(key).addObserver(builder: (ctx, data, _) {
+      body: getLine<YsMinBean>(key).addObserver(
+          onRefresh: this.loadYueSaoViewMin,
+          child: _chargeWidget(),
+          builder: (ctx, data, priceWidget) {
         return Stack(
           children: [
             ListView(
@@ -178,7 +214,7 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
                 _ysViewMinWidget(),
                 _serviceWidget(),
                 _contactWidget(),
-                _chargeWidget(),
+                priceWidget,
                 _remarkWidget(),
                 _protocolWidget(),
                 Container(height: AdaptUI.rpx(120))
@@ -212,7 +248,8 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
               ),
             ),
           ),
-        ));
+        ),
+    );
   }
 
 
@@ -322,67 +359,71 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
 
   /* 费用 */
   Widget _chargeWidget() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.only(
-              top: AdaptUI.rpx(30),
-              left: AdaptUI.rpx(30),
-              bottom: AdaptUI.rpx(20)),
-          child: Text(
-            "服务费用",
-            style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(30)),
-          ),
-        ),
-        Container(
-          height: AdaptUI.rpx(110),
-          padding:
+    return getLine<OrderPrice>(priceKey).addObserver(
+      builder: (ctx, data, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                  top: AdaptUI.rpx(30),
+                  left: AdaptUI.rpx(30),
+                  bottom: AdaptUI.rpx(20)),
+              child: Text(
+                "服务费用",
+                style: TextStyle(color: UIColor.hex666, fontSize: AdaptUI.rpx(30)),
+              ),
+            ),
+            Container(
+              height: AdaptUI.rpx(110),
+              padding:
               EdgeInsets.only(left: AdaptUI.rpx(30), right: AdaptUI.rpx(30)),
-          decoration: BoxDecoration(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _orderPrice.name,
+                    style: TextStyle(fontSize: AdaptUI.rpx(30)),
+                  ),
+                  Text(
+                    "￥${_orderPrice.priceCorp}元",
+                    style: TextStyle(
+                        fontSize: AdaptUI.rpx(32), color: UIColor.fontLevel),
+                  )
+                ],
+              ),
+            ),
+            Container(
               color: Colors.white,
-              border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "住家月子服务",
-                style: TextStyle(fontSize: AdaptUI.rpx(30)),
+              padding: EdgeInsets.only(
+                  left: AdaptUI.rpx(30),
+                  right: AdaptUI.rpx(30),
+                  top: AdaptUI.rpx(20),
+                  bottom: AdaptUI.rpx(20)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "温馨提示:",
+                    style: TextStyle(fontSize: AdaptUI.rpx(30)),
+                  ),
+                  Container(
+                    height: AdaptUI.rpx(20),
+                  ),
+                  Text(
+                    "月子服务期间如遇国家法定节日（春节除外），需额外支付1倍工资，春节需额外支付2倍工资，请在月嫂开始服务当天另行支付。",
+                    style: TextStyle(
+                        fontSize: AdaptUI.rpx(26), color: UIColor.fontLevel),
+                  )
+                ],
               ),
-              Text(
-                "￥${_orderPrice.priceCorp}元",
-                style: TextStyle(
-                    fontSize: AdaptUI.rpx(32), color: UIColor.fontLevel),
-              )
-            ],
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          padding: EdgeInsets.only(
-              left: AdaptUI.rpx(30),
-              right: AdaptUI.rpx(30),
-              top: AdaptUI.rpx(20),
-              bottom: AdaptUI.rpx(20)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "温馨提示:",
-                style: TextStyle(fontSize: AdaptUI.rpx(30)),
-              ),
-              Container(
-                height: AdaptUI.rpx(20),
-              ),
-              Text(
-                "月子服务期间如遇国家法定节日（春节除外），需额外支付1倍工资，春节需额外支付2倍工资，请在月嫂开始服务当天另行支付。",
-                style: TextStyle(
-                    fontSize: AdaptUI.rpx(26), color: UIColor.fontLevel),
-              )
-            ],
-          ),
-        )
-      ],
+            )
+          ],
+        );
+      }
     );
   }
 
@@ -400,9 +441,18 @@ class _OrderYsCommitPageState extends State<OrderYsCommitPage>
   Widget _serviceWidget() {
     return OrderServerYsWidget(
       serviceDayArr: _serviceDayList,
-      onServiceDayCallBack: (serviceDay) => this._serviceDay = serviceDay,
-      onPreDateCallBack: (preDate) => this._preDateStamp = preDate,
-      onBabyNumCallBack: (num) => this._num = num,
+      onServiceDayCallBack: (serviceDay) {
+        this._serviceDay = serviceDay;
+        this.changeOrderPrice();
+      },
+      onPreDateCallBack: (preDate) {
+        this._preDateStamp = preDate;
+        this.checkSchedule();
+      },
+      onBabyNumCallBack: (num) {
+        this._num = num;
+        this.changeOrderPrice();
+      },
       onShortTap: () {},
     );
   }

@@ -123,7 +123,7 @@ class OrderPrice {
     _levelId = json["level_id"];
     _sum = json["sum"];
     _priceDays = json["price_days"];
-    _corpId = json["corp_id"];
+    _corpId = json["corp_id"].toString();
     _priceCorp = json["price_corp"];
   }
 

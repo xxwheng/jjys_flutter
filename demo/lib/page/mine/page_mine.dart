@@ -8,6 +8,7 @@ import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/user_data.dart';
 import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/page/mine/login_page.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,7 @@ class PageMine extends StatefulWidget {
   _PageMineState createState() => _PageMineState();
 }
 
-class _PageMineState extends State<PageMine> {
+class _PageMineState extends State<PageMine> with WidgetsBindingObserver, NavigatorObserver {
   final List<String> menuList = ["我的优惠券", "我的关注", "分享应用", "专属服务", "关于"];
   final List<Widget> leadIcons = [
     Icon(Icons.flag, color: UIColor.hex666),
@@ -31,11 +32,64 @@ class _PageMineState extends State<PageMine> {
   @override
   void initState() {
     // TODO: implement initState
+    logger.i("mine_initState");
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    logger.i("mine_didChangeDependencies");
+    super.didChangeDependencies();
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) {
+    // TODO: implement didPushRoute
+    logger.i("mine_didPushRoute");
+    return super.didPushRoute(route);
+  }
+
+  @override
+  Future<bool> didPopRoute() {
+    // TODO: implement didPopRoute
+    logger.i("mine_didPopRoute");
+    return super.didPopRoute();
+  }
+
+  @override
+  void didUpdateWidget(covariant PageMine oldWidget) {
+    // TODO: implement didUpdateWidget
+    logger.i("mine_didUpdateWidget");
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    logger.i("mine_deactivate");
+    super.deactivate();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    logger.i("mine_AppLife_${state.toString()}");
+    super.didChangeAppLifecycleState(state);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   /* 点击头像 */
   void headerIconDidTap() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context)=> LoginPage()));
+    return;
     if (!UserData.isLogin) {
       App.navigationTo(context, PageRoutes.loginPage);
       return;
@@ -63,6 +117,7 @@ class _PageMineState extends State<PageMine> {
 
   @override
   Widget build(BuildContext context) {
+    logger.i("mine_build");
     return Scaffold(
       appBar: AppBar(
         title: Consumer<CorpData>(
@@ -106,7 +161,6 @@ class _PageMineState extends State<PageMine> {
                       child: Center(
                         child:
                             Consumer<UserData>(builder: (context, userData, _) {
-                          logger.i("重置用户名");
                           return Text(
                             userData?.user?.nickName ?? "未登录",
                             style: TextStyle(

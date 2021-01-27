@@ -6,7 +6,11 @@ import 'package:demo/model/config_corp_bean.dart';
 import 'package:demo/model/config_yswork_bean.dart';
 import 'package:demo/model/corp_grop_bean.dart';
 import 'package:demo/model/home_bean.dart';
+import 'package:demo/model/order_detail_bean.dart';
 import 'package:demo/model/order_index_bean.dart';
+import 'package:demo/model/order_pay_info_bean.dart';
+import 'package:demo/model/order_short_product_bean.dart';
+import 'package:demo/model/order_water_bean.dart';
 import 'package:demo/model/order_ys_price.dart';
 import 'package:demo/model/ys_comment_list.dart';
 import 'package:demo/model/ys_detail_bean.dart';
@@ -66,6 +70,33 @@ Future<OrderListBean> parseOrderListCompute(value) async {
 
 OrderListBean _parseOrderListBean(dynamic json) {
   return OrderListBean.fromJson(json);
+}
+
+/// 订单详情
+Future<OrderDetailBean> parseOrderDetailCompute(value) async {
+  return compute(_parseOrderDetailBean,value);
+}
+
+OrderDetailBean _parseOrderDetailBean(dynamic json) {
+  return OrderDetailBean.fromJson(json);
+}
+
+/// 订单流程
+Future<OrderWaterBean> parseOrderWaterCompute(value) async {
+  return compute(_parseOrderWaterBean,value);
+}
+
+OrderWaterBean _parseOrderWaterBean(dynamic json) {
+  return OrderWaterBean.fromJson(json);
+}
+
+/// 短期护理单产品列表
+Future<OrderShortProductBean> parseOrderShortProductCompute(value) async {
+  return compute(_parseOrderShortProductBean,value);
+}
+
+OrderShortProductBean _parseOrderShortProductBean(dynamic json) {
+  return OrderShortProductBean.fromJson(json);
 }
 
 /// 加盟商城市列表
@@ -163,6 +194,15 @@ OrderYsPrice _parseYsOrderPrice(dynamic json) {
   return OrderYsPrice.fromJson(json);
 }
 
+
+/// 订单支付信息
+Future<OrderPayInfoBean> parseYsOrderPayInfo(value) {
+  return compute(_parseYsOrderPayInfo, value);
+}
+
+OrderPayInfoBean _parseYsOrderPayInfo(dynamic json) {
+  return OrderPayInfoBean.fromJson(json);
+}
 
 /// 单字符串列表
 Future<List<String>> parseListStringCompute(value) {

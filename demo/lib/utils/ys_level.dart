@@ -1,5 +1,15 @@
 /*月嫂 育婴师等级转换*/
 class YsLevel {
+
+  /* 催乳服务级别 */
+  static String getCuiRuType(String num) {
+    if (num == '1') {
+      return "高级";
+    } else {
+      return "专家级";
+    }
+  }
+
   /*月嫂等级转换*/
   static String getYuesaoLevel(String level) {
     switch (level) {

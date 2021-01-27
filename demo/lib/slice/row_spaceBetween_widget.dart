@@ -15,6 +15,7 @@ class RowSpaceBetweenWidget extends StatelessWidget {
       height: AdaptUI.rpx(100),
       padding: EdgeInsets.only(left: AdaptUI.rpx(30), right: AdaptUI.rpx(30)),
       decoration: BoxDecoration(
+        color: Colors.white,
           border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

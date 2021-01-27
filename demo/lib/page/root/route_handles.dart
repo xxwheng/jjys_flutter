@@ -4,12 +4,16 @@ import 'package:demo/data/global_data.dart';
 import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/article/page_article_search.dart';
 import 'package:demo/page/home/page_corp_list.dart';
+import 'package:demo/page/menu/short_service_page.dart';
 import 'package:demo/page/mine/login_page.dart';
 import 'package:demo/page/mine/my_coupon.dart';
 import 'package:demo/page/mine/my_info.dart';
 import 'package:demo/page/mine/my_info_nickname.dart';
 import 'package:demo/page/mine/ys_collect.dart';
+import 'package:demo/page/order/order_detail.dart';
+import 'package:demo/page/order/order_short_commit.dart';
 import 'package:demo/page/order/order_ys_commit.dart';
+import 'package:demo/page/order/order_ys_pay.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/page/yuesao/work_show.dart';
 import 'package:demo/page/yuesao/ys_detail.dart';
@@ -95,4 +99,34 @@ var ysOrderCommitHandler = Handler(
     String id = params['id']?.first?.toString();
     return OrderYsCommitPage(id: id);
   }
+);
+
+/* 月嫂支付页 */
+var ysOrderPayHandler = Handler(
+  handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+    String id = params['id']?.first?.toString();
+    return OrderYsPayPage(id: id);
+  }
+);
+
+/* 订单详情 */
+var orderDetailHandler = Handler(
+  handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+    String id = params['id']?.first?.toString();
+    return OrderDetailPage(id: id);
+  }
+);
+
+/* 短期护理 */
+var shortServiceHandler = Handler(
+  handlerFunc: (BuildContext context, Map<String,dynamic> params) {
+    return ShortServicePage();
+  }
+);
+
+/* 短单提交 */
+var shortOrderCommitHandler = Handler(
+    handlerFunc: (BuildContext context, Map<String,dynamic> params) {
+      return OrderShortCommitPage();
+    }
 );

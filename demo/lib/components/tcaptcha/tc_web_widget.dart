@@ -58,7 +58,7 @@ class _TCaptchaWebWidgetState extends State<TCaptchaWebWidget> {
         children: [
           Opacity(opacity: 0.1,child:
             Container(
-              color: Colors.black,
+              color: Color(0x19000000),
             )
             ,),
           Align(

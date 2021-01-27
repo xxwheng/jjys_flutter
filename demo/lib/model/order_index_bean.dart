@@ -1,4 +1,6 @@
 import 'package:date_format/date_format.dart';
+import 'package:demo/data/global_data.dart';
+import 'package:demo/data/order_data.dart';
 
 /// info_product :
 ///{"id":"47","citycode":"103212","name":"住家月子服务","one_price":"646.15","two_price":"775.38","market_price":"800.00","group_id":"13","level_id":"7","status":"1","desc":"26天起订，按单天价格计算。","service_days":"1","icon":"","default":"0","tag":"p2.2b"}
@@ -36,12 +38,14 @@ class OrderListBean {
   }
 }
 
-class OrderIndexBean {
+class OrderAbsBean {
   InfoProduct _infoProduct;
   List<CaregiverServer> _caregiverServer;
   InfoOrder _infoOrder;
   InfoCaregiver _infoCaregiver;
   ChargeExtra _chargeExtra;
+
+  List<OrderControlBtModel> _ctrlBts;
 
   InfoProduct get infoProduct => _infoProduct;
 
@@ -53,25 +57,53 @@ class OrderIndexBean {
 
   ChargeExtra get chargeExtra => _chargeExtra;
 
+  List<OrderControlBtModel> get ctrlBts => _ctrlBts;
+}
+
+class OrderIndexBean extends OrderAbsBean {
+  InfoProduct _infoProduct;
+  List<CaregiverServer> _caregiverServer;
+  InfoOrder _infoOrder;
+  InfoCaregiver _infoCaregiver;
+  ChargeExtra _chargeExtra;
+  JJRoleType orderRole;
+
+
+  List<OrderControlBtModel> _ctrlBts;
+
+  InfoProduct get infoProduct => _infoProduct;
+
+  List<CaregiverServer> get caregiverServer => _caregiverServer;
+
+  InfoOrder get infoOrder => _infoOrder;
+
+  InfoCaregiver get infoCaregiver => _infoCaregiver;
+
+  ChargeExtra get chargeExtra => _chargeExtra;
+
+  List<OrderControlBtModel> get ctrlBts => _ctrlBts;
+
   OrderIndexBean(
       {InfoProduct infoProduct,
       List<CaregiverServer> caregiverServer,
       InfoOrder infoOrder,
       InfoCaregiver infoCaregiver,
-      ChargeExtra chargeExtra}) {
+      ChargeExtra chargeExtra,
+      List<OrderControlBtModel> ctrlBts}) {
     _infoProduct = infoProduct;
     _caregiverServer = caregiverServer;
     _infoOrder = infoOrder;
     _infoCaregiver = infoCaregiver;
     _chargeExtra = chargeExtra;
+    _ctrlBts = ctrlBts;
   }
 
   OrderIndexBean.fromJson(dynamic json) {
     _infoProduct = json["info_product"] != null
         ? InfoProduct.fromJson(json["info_product"])
         : null;
+    _caregiverServer = [];
     if (json["caregiver_server"] != null) {
-      _caregiverServer = [];
       json["caregiver_server"].forEach((v) {
         _caregiverServer.add(CaregiverServer.fromJson(v));
       });
@@ -85,6 +117,8 @@ class OrderIndexBean {
     _chargeExtra = json["charge_extra"] != null
         ? ChargeExtra.fromJson(json["charge_extra"])
         : null;
+    _ctrlBts = OrderDataTool.getOrderCtrlBts(this);
+    orderRole = OrderDataTool.getOrderType(_infoOrder.serviceItem, isEmpty: _caregiverServer.isEmpty);
   }
 
   Map<String, dynamic> toJson() {
@@ -114,30 +148,30 @@ class OrderIndexBean {
 /// data : []
 
 class ChargeExtra {
-  String _totalMoneySum;
-  String _totalMoneyTopay;
+  double _totalMoneySum;
+  double _totalMoneyTopay;
   List<dynamic> _data;
 
-  String get totalMoneySum => _totalMoneySum;
+  double get totalMoneySum => _totalMoneySum;
 
-  String get totalMoneyTopay => _totalMoneyTopay;
+  double get totalMoneyTopay => _totalMoneyTopay;
 
   List<dynamic> get data => _data;
 
   ChargeExtra(
-      {String totalMoneySum, String totalMoneyTopay, List<dynamic> data}) {
+      {double totalMoneySum, double totalMoneyTopay, List<dynamic> data}) {
     _totalMoneySum = totalMoneySum;
     _totalMoneyTopay = totalMoneyTopay;
     _data = data;
   }
 
   ChargeExtra.fromJson(dynamic json) {
-    _totalMoneySum = json["total_money_sum"].toString();
-    _totalMoneyTopay = json["total_money_topay"].toString();
+    _totalMoneySum = double.parse(json["total_money_sum"]?.toString() ?? '0') ?? 0;
+    _totalMoneyTopay = double.parse(json["total_money_topay"]?.toString() ?? '0') ?? 0;
+    _data = [];
     if (json["data"] != null) {
-      _data = [];
       json["data"].forEach((v) {
-        _data.add(v.toString());
+//        _data.add(v.toString());
       });
     }
   }
@@ -164,7 +198,7 @@ class ChargeExtra {
 /// cityname : "深圳"
 
 class InfoCaregiver {
-  String _id;
+  int _id;
   String _citycode;
   String _name;
   String _phone;
@@ -175,7 +209,7 @@ class InfoCaregiver {
   String _corpId;
   String _cityname;
 
-  String get id => _id;
+  int get id => _id;
 
   String get citycode => _citycode;
 
@@ -196,7 +230,7 @@ class InfoCaregiver {
   String get cityname => _cityname;
 
   InfoCaregiver(
-      {String id,
+      {int id,
       String citycode,
       String name,
       String phone,
@@ -219,7 +253,7 @@ class InfoCaregiver {
   }
 
   InfoCaregiver.fromJson(dynamic json) {
-    _id = json["id"].toString();
+    _id = int.parse(json["id"]?.toString()  ?? '0') ?? 0;
     _citycode = json["citycode"].toString();
     _name = json["name"];
     _phone = json["phone"];
@@ -279,8 +313,9 @@ class InfoOrder {
   String _productDays;
   String _caregiverId;
   String _payType;
-  String _process;
-  String _status;
+  int _process;
+  int _status;
+  int _commissionpaystatus = -1;
   String _totalMoney;
   String _payMoney;
   String _productPrice;
@@ -292,6 +327,17 @@ class InfoOrder {
   String _orderType;
   String _contact;
   String _attribute;
+  String _addressInfo;
+  String _userName;
+  String _phone;
+  String _remark;
+
+  // 总计需支付金额
+  double totalToPay = 0.00;
+  // 定金支付金额
+  String preToPay = "0.00";
+  // 剩余支付金额
+  double waitPay = 0.00;
 
   String get id => _id;
 
@@ -312,9 +358,11 @@ class InfoOrder {
 
   String get payType => _payType;
 
-  String get process => _process;
+  int get process => _process;
 
-  String get status => _status;
+  int get status => _status;
+
+  int get commissionpaystatus => _commissionpaystatus;
 
   String get totalMoney => _totalMoney;
 
@@ -338,6 +386,11 @@ class InfoOrder {
 
   String get attribute => _attribute;
 
+  String get addressInfo => _addressInfo;
+  String get userName => _userName;
+  String get phone => _phone;
+  String get remark => _remark;
+
   InfoOrder(
       {String id,
       String citycode,
@@ -348,8 +401,9 @@ class InfoOrder {
       String productDays,
       String caregiverId,
       String payType,
-      String process,
-      String status,
+      int process,
+      int status,
+      int commissionpaystatus,
       String totalMoney,
       String payMoney,
       String productPrice,
@@ -360,7 +414,12 @@ class InfoOrder {
       String createAt,
       String orderType,
       String contact,
-      String attribute}) {
+      String attribute,
+        String addressInfo,
+
+      String userName,
+        String phone,
+        String remark}) {
     _id = id;
     _citycode = citycode;
     _num = num;
@@ -372,6 +431,7 @@ class InfoOrder {
     _payType = payType;
     _process = process;
     _status = status;
+    _commissionpaystatus = commissionpaystatus;
     _totalMoney = totalMoney;
     _payMoney = payMoney;
     _productPrice = productPrice;
@@ -383,6 +443,10 @@ class InfoOrder {
     _orderType = orderType;
     _contact = contact;
     _attribute = attribute;
+     _addressInfo = addressInfo;
+     _userName = userName;
+     _phone = phone;
+     _remark = remark;
   }
 
   InfoOrder.fromJson(dynamic json) {
@@ -395,14 +459,16 @@ class InfoOrder {
     _productDays = json["product_days"].toString();
     _caregiverId = json["caregiver_id"].toString();
     _payType = json["pay_type"].toString();
-    _process = json["process"].toString();
-    _status = json["status"].toString();
+    _process = int.parse(json["process"]?.toString() ?? '-1') ?? -1;
+    _status = int.parse(json["status"]?.toString() ?? '-1') ?? -1;
+    _commissionpaystatus =
+        int.parse(json["commissionpaystatus"]?.toString() ?? '-1') ?? -1;
     _totalMoney = json["total_money"].toString();
     _payMoney = json["pay_money"].toString();
     _productPrice = json["product_price"].toString();
     _couponId = json["coupon_id"].toString();
     _couponMomey = json["coupon_momey"].toString();
-    var timestamp = int.parse(json["schedule_date"].toString()) ?? 0;
+    var timestamp = int.parse(json["schedule_date"]?.toString() ?? '0') ?? 0;
     var date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
     _scheduleDate = formatDate(date, [yyyy, '-', mm, '-', dd]);
     _title = json["title"];
@@ -410,6 +476,11 @@ class InfoOrder {
     _orderType = json["order_type"].toString();
     _contact = json["contact"];
     _attribute = json["attribute"];
+    _addressInfo = json["address_info"].toString();
+    _userName = json["username"].toString();
+    _phone = json["phone"].toString();
+    _remark = json["remark"].toString();
+    OrderDataTool.caculateOrderPayPrice(this);
   }
 
   Map<String, dynamic> toJson() {
@@ -493,10 +564,16 @@ class CaregiverServer {
     _serviceStart = json["service_start"];
     _serviceEnd = json["service_end"];
     _remark = json["remark"];
-    _serviceDay = json["service_day"].toString();
+    var serviceDay = double.parse(json["service_day"]?.toString() ?? '0') ?? 0;
+    if (serviceDay == 0) {
+      _serviceDay = _productDays;
+    } else {
+      _serviceDay = serviceDay.toString();
+    }
     _infoCaregiver = json["info_caregiver"] != null
         ? InfoCaregiver.fromJson(json["info_caregiver"])
         : null;
+
   }
 
   Map<String, dynamic> toJson() {
