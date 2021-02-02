@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserData extends ChangeNotifier {
   final String userBeanKey = "user_bean_key";
-  static bool isLogin = false;
+  static bool isLogin = true;
   UserInfoBean user;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();

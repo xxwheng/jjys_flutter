@@ -7,6 +7,7 @@ import 'package:demo/common/common.dart';
 import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/user_data.dart';
 import 'package:demo/model/user_info_bean.dart';
+import 'package:demo/native/ios/mine_bridge.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/mine/login_page.dart';
 import 'package:demo/page/root/app.dart';
@@ -88,8 +89,6 @@ class _PageMineState extends State<PageMine> with WidgetsBindingObserver, Naviga
 
   /* 点击头像 */
   void headerIconDidTap() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context)=> LoginPage()));
-    return;
     if (!UserData.isLogin) {
       App.navigationTo(context, PageRoutes.loginPage);
       return;
@@ -110,6 +109,13 @@ class _PageMineState extends State<PageMine> with WidgetsBindingObserver, Naviga
         break;
       case 1:
         App.navigationTo(context, PageRoutes.myCollect);
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      case 4:
+        MineNativeBridge().gotoAbout();
         break;
     }
   }

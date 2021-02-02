@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:demo/components/pageList/page_dataSource.dart';
 import 'package:demo/components/pageList/page_refresh_widget.dart';
 import 'package:demo/model/article_bean.dart';
+import 'package:demo/native/ios/mine_bridge.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/slice/article_widget.dart';
 import 'package:demo/utils/bus/data_bus.dart';
@@ -59,6 +60,12 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
     });
   }
 
+  /// 点击文章
+  void articleDidTap(ArticleBean e) {
+    MineNativeBridge().gotoArticleWeb(e.id, e.title);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -76,10 +83,13 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
           itemCount: list.length,
           itemBuilder: (context, index) {
             ArticleBean item = list[index];
-            return ArticleWidget(
-              imageUrl: item.image,
-              title: item.title,
-              desc: item.desc,
+            return GestureDetector(
+              onTapUp: (tap) => this.articleDidTap(item),
+              child: ArticleWidget(
+                imageUrl: item.image,
+                title: item.title,
+                desc: item.desc,
+              ),
             );
           }),
     );

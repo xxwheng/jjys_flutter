@@ -41,6 +41,21 @@ import 'package:flutter/material.dart';
 ///                   commissionpaystatus == 0 育婴工资支付
 ///  else 一般确认支付
 
+/// 月嫂支付方式
+enum OrderPayType {
+  /* 一般支付  支付定金或者全款  有的选 (俩圆圈按钮) */
+  payNormal,
+  /* 支付尾款  [没得选 就一个] */
+  tailPay,
+  /* 支付全款  [短单什么的] */
+  allPay,
+  /* 支付限额什么的 */
+  limitPay,
+}
+
+OrderPayType ysOrderPayType(int value) {
+  return OrderPayType.values.firstWhere((element) => element.index == value);
+}
 
 /// 订单功能按钮
 enum OrderBtsType {
@@ -58,8 +73,14 @@ enum OrderBtsType {
   payNurseSalary,
   /* 节假日额外支付 */
   payExtra,
-  /* 一般支付 */
+  /* 一般支付  支付定金或者全款  有的选 (俩圆圈按钮) */
   payNormal,
+  /* 支付尾款  [没得选 就一个] */
+  tailPay,
+  /* 支付全款  [短单什么的] */
+  allPay,
+  /* 支付限额什么的 */
+  limitPay,
 }
 
 
@@ -118,8 +139,19 @@ class OrderDataTool {
           tempList.add(bt);
         }
       } else {
-        OrderControlBtModel bt = OrderControlBtModel(OrderBtsType.payNormal, btText, UIColor.fontLevel, UIColor.fontLevel);
-        tempList.add(bt);
+        if (item.infoOrder.status == 2) {
+          OrderControlBtModel bt = OrderControlBtModel(OrderBtsType.tailPay, btText, UIColor.fontLevel, UIColor.fontLevel);
+          tempList.add(bt);
+        } else {
+          var productDay = double.parse(item.infoOrder.productDays);
+          if (productDay < 26) {
+            OrderControlBtModel bt = OrderControlBtModel(OrderBtsType.allPay, btText, UIColor.fontLevel, UIColor.fontLevel);
+            tempList.add(bt);
+          } else {
+            OrderControlBtModel bt = OrderControlBtModel(OrderBtsType.payNormal, btText, UIColor.fontLevel, UIColor.fontLevel);
+            tempList.add(bt);
+          }
+        }
       }
     } else if (item.infoOrder.status == 3) {
       if (item.infoOrder.serviceItem == '3') {

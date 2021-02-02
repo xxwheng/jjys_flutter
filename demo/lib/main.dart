@@ -1,13 +1,13 @@
 import 'package:demo/common/color.dart';
-import 'package:demo/common/common.dart';
 import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/user_data.dart';
-import 'package:demo/page/mine/login_page.dart';
+import 'package:demo/page/pay/xx_wxpay.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:provider/provider.dart';
+import 'package:xx_pay/xx_pay.dart';
 
 void main() {
   /* 初始化路由 */
@@ -28,6 +28,10 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    ///  universalLink不能为空
+    XxPay.wxRegisterApp("wx4ac4c47ec2e975db", "https://m.jjys168.com/userclient/");
+
     return MaterialApp(
       title: 'Material App',
       theme: ThemeData(primaryColor: UIColor.mainColor),

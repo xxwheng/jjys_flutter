@@ -3,12 +3,17 @@ import 'package:demo/common/color.dart';
 import 'package:demo/common/common.dart';
 import 'package:demo/data/bean_compute.dart';
 import 'package:demo/data/global_data.dart';
+import 'package:demo/data/order_data.dart';
 import 'package:demo/model/order_pay_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
+import 'package:demo/page/pay/xx_alipay.dart';
+import 'package:demo/page/pay/xx_wxpay.dart';
+import 'package:demo/page/root/app.dart';
 import 'package:demo/slice/radio_list_view.dart';
 import 'package:demo/slice/row_spaceBetween_widget.dart';
 import 'package:demo/utils/bus/data_bus.dart';
 import 'package:demo/utils/bus/data_line.dart';
+import 'package:demo/utils/v_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:xx_pay/alipay_result_bean.dart';
 import 'package:xx_pay/xx_pay.dart';
@@ -16,8 +21,9 @@ import 'package:xx_pay/xx_pay.dart';
 /* 月嫂订单支付 */
 class OrderYsPayPage extends StatefulWidget {
   final String id;
+  final OrderPayType payType;
 
-  OrderYsPayPage({Key key, this.id}) : super(key: key);
+  OrderYsPayPage({Key key, this.id, this.payType = OrderPayType.payNormal}) : super(key: key);
 
   @override
   _OrderYsPayPageState createState() => _OrderYsPayPageState();
@@ -26,6 +32,11 @@ class OrderYsPayPage extends StatefulWidget {
 class _OrderYsPayPageState extends State<OrderYsPayPage> with MultiDataLine {
   final String key = "order_key";
   OrderPayInfoBean _payInfoBean;
+  /// 可选择的时候， 是全款还是订金  [1定金2尾款3全款4限额支付]
+  var normalType = 3;
+  /// 默认支付宝支付
+  JJPayType channel = JJPayType.aliPay;
+
 
   @override
   void initState() {
@@ -53,30 +64,26 @@ class _OrderYsPayPageState extends State<OrderYsPayPage> with MultiDataLine {
 
   /* 点击支付 */
   void payDidTap(tap) {
-//    return;
-    XXNetwork.shared.post(params: {
-      "methodName": "OrderPayStart",
-      "order_id": widget.id,
-      "type": 1,
-      "channel": "alipay",
-      "extra_pay": "0",
-      "charge_type": 2,
-      "app_id": "2018053160301392"
-    }).then((value) {
-      var payUrl = value["charge_wx"]["mweb_url"].toString();
-      logger.i(payUrl);
-      return XxPay.aliPay(payUrl, "JJYSAlipay");
-    }).then((res) {
-      switch (res.code) {
-        case AliPayCode.succeed:
-          break;
-        case AliPayCode.cancelled:
-          break;
-        default:
+    var type = 3;
+    if (widget.payType == OrderPayType.payNormal) {
+      type = this.normalType;
+    } else if (widget.payType == OrderPayType.tailPay) {
+      type = 2;
+    }
 
-          break;
-      }
-    });
+    if (this.channel == JJPayType.aliPay) {
+      /// 支付宝支付
+      XXAliPay.pay(context, widget.id, type).then((value) {
+        /// 支付成功
+      });
+    } else {
+      /// 微信支付
+      XXWXPay.pay(context, widget.id, type).then((value) {
+        /// 支付成功
+
+      });
+    }
+
   }
 
   @override
@@ -134,7 +141,12 @@ class _OrderYsPayPageState extends State<OrderYsPayPage> with MultiDataLine {
       title: "支付方式",
       child: Column(
         children: [
-          RadioListView(children: [
+          RadioListView(
+              indexCallBack: (index) {
+                /// 切换支付方式
+                this.channel = jjPayType(index);
+              },
+              children: [
             payRowWidget(JJPayType.aliPay),
             payRowWidget(JJPayType.wxPay)
           ]),
@@ -208,8 +220,82 @@ class _OrderYsPayPageState extends State<OrderYsPayPage> with MultiDataLine {
 
   final String keyPayMoney = "pay_money";
 
+  /// 三种类型 （订金、全款） （全款） （尾款）
   /* 支付金额 */
   Widget _sectionPayWidget() {
+    switch(widget.payType) {
+      case OrderPayType.payNormal:
+        return _sectionPayNormalWidget();
+      case OrderPayType.allPay:
+        return _sectionPayAllWidget();
+      case OrderPayType.tailPay:
+        return _sectionPayTail();
+    }
+  }
+
+  /// （尾款）
+  Widget _sectionPayTail() {
+    return sectionWidget(
+        title: "支付金额",
+        child: Column(
+          children: [
+            RadioListView(
+              children: [
+                RowSpaceBetweenWidget(
+                  left: Text("支付尾款"),
+                  right: Text("￥${_payInfoBean.infoOrder.totalToPay}元"),
+                )
+              ],
+            ),
+            RowSpaceBetweenWidget(
+              left: Text("总金额",
+                  style: TextStyle(
+                      color: UIColor.fontLevel, fontWeight: FontWeight.w500)),
+              right: getLine<String>(keyPayMoney,
+                  initValue: "${_payInfoBean.infoOrder.totalToPay}")
+                  .addObserver(builder: (ctx, data, _) {
+                return Text("￥$data元",
+                    style: TextStyle(
+                        color: UIColor.fontLevel, fontWeight: FontWeight.w500));
+              }),
+            )
+          ],
+        ));
+  }
+
+
+  /// （全款）
+  Widget _sectionPayAllWidget() {
+    return sectionWidget(
+        title: "支付金额",
+        child: Column(
+          children: [
+            RadioListView(
+              children: [
+                RowSpaceBetweenWidget(
+                  left: Text("支付全款"),
+                  right: Text("￥${_payInfoBean.infoOrder.totalToPay}元"),
+                )
+              ],
+            ),
+            RowSpaceBetweenWidget(
+              left: Text("总金额",
+                  style: TextStyle(
+                      color: UIColor.fontLevel, fontWeight: FontWeight.w500)),
+              right: getLine<String>(keyPayMoney,
+                  initValue: "${_payInfoBean.infoOrder.totalToPay}")
+                  .addObserver(builder: (ctx, data, _) {
+                return Text("￥$data元",
+                    style: TextStyle(
+                        color: UIColor.fontLevel, fontWeight: FontWeight.w500));
+              }),
+            )
+          ],
+        ));
+  }
+
+  /// （订金、全款）
+  Widget _sectionPayNormalWidget() {
     return sectionWidget(
         title: "支付金额",
         child: Column(
@@ -217,6 +303,7 @@ class _OrderYsPayPageState extends State<OrderYsPayPage> with MultiDataLine {
             RadioListView(
               beginIndex: 1,
               indexCallBack: (index) {
+                this.normalType = index == 0 ? 1 : 3;
                 getLine<String>(keyPayMoney).setData(index == 0
                     ? _payInfoBean.infoOrder.preToPay
                     : "${_payInfoBean.infoOrder.totalToPay}");

@@ -53,7 +53,7 @@ class App {
 
   /* 页面内手动切换tabBar */
   static void switchTabBar(BuildContext context, int index) {
-    App.switchIndex(2);
+    App.switchIndex(index);
     App.popToRoot(context);
   }
   
@@ -86,6 +86,9 @@ class PageRoutes {
 
   /* 月嫂详情 */
   static String ysDetailPage = "/page/yuesao/ys_detail";
+
+  /* 育婴师详情 */
+  static String yyDetailPage = "/page/yuying/yy_detail";
 
   /* 月嫂工作风采 */
   static String ysWorkShowPage = "/page/yuesao/work_show";
@@ -126,6 +129,7 @@ class PageRoutes {
     router.define(shortServicePage, handler: shortServiceHandler);
     router.define(shortOrderCommitPage, handler: shortOrderCommitHandler);
     router.define(ysDetailPage, handler: ysDetailPageHandler);
+    router.define(yyDetailPage, handler: yyDetailPageHandler);
     router.define(ysOrderCommitPage, handler: ysOrderCommitHandler);
     router.define(ysWorkShowPage, handler: ysWorkShowHandler);
     router.define(yyListPage, handler: yuyingListPageHandler);

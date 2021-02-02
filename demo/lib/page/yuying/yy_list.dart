@@ -135,7 +135,7 @@ class _YuyingListPageState extends State<YuyingListPage>
 
   /* 点击进入育婴师详情 */
   void ysItemDidTap(YsItemBean item) {
-    App.navigationTo(context, PageRoutes.ysDetailPage);
+    App.navigationTo(context, PageRoutes.yyDetailPage + "?id=" + item.id.toString());
   }
 
   @override

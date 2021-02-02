@@ -101,6 +101,18 @@ class _PageOrderState extends State<PageOrder>
           }
         });
         break;
+      case OrderBtsType.payNormal:
+        App.navigationTo(context, PageRoutes.ysOrderPayPage + "?id=" + item.infoOrder.id);
+        break;
+      case OrderBtsType.allPay:
+        App.navigationTo(context, PageRoutes.ysOrderPayPage + "?id=" + item.infoOrder.id + "&type=" + OrderPayType.allPay.index.toString());
+        break;
+      case OrderBtsType.tailPay:
+        break;
+      case OrderBtsType.payNurseOrder:
+        break;
+      case OrderBtsType.payNurseSalary:
+        break;
       default:
         break;
     }

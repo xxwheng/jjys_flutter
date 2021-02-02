@@ -40,7 +40,7 @@ dependencies:
   # 图片缓存
   cached_network_image: ^2.3.3
   # 刷新加载
-  pull_to_refresh: ^1.6.1
+  pull_to_refresh: 1.6.3
   # 日期picker
   flutter_datetime_picker: ^1.4.0
   # 日历

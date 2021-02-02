@@ -1,6 +1,7 @@
 import 'package:demo/common/common.dart';
 import 'package:demo/components/web/single_web.dart';
 import 'package:demo/data/global_data.dart';
+import 'package:demo/data/order_data.dart';
 import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/page/article/page_article_search.dart';
 import 'package:demo/page/home/page_corp_list.dart';
@@ -17,6 +18,7 @@ import 'package:demo/page/order/order_ys_pay.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:demo/page/yuesao/work_show.dart';
 import 'package:demo/page/yuesao/ys_detail.dart';
+import 'package:demo/page/yuying/yy_detail.dart';
 import 'package:demo/page/yuying/yy_list.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
@@ -46,6 +48,14 @@ var ysListPageHandler = Handler(
 var yuyingListPageHandler = Handler(
     handlerFunc: (BuildContext context, Map<String, dynamic> params) =>
         YuyingListPage());
+
+
+var yyDetailPageHandler = Handler(
+    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+      String id = params['id']?.first?.toString();
+      return YYDetailPage(id: id);
+    }
+);
 
 /* 月嫂详情 */
 var ysDetailPageHandler = Handler(
@@ -105,7 +115,12 @@ var ysOrderCommitHandler = Handler(
 var ysOrderPayHandler = Handler(
   handlerFunc: (BuildContext context, Map<String, dynamic> params) {
     String id = params['id']?.first?.toString();
-    return OrderYsPayPage(id: id);
+    String type = params['type']?.first?.toString();
+    OrderPayType payType = OrderPayType.payNormal;
+    if (type != null) {
+      payType = ysOrderPayType(int.parse(type));
+    }
+    return OrderYsPayPage(id: id, payType: payType);
   }
 );
 
