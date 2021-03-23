@@ -32,6 +32,8 @@ class YsDetailHeader extends StatelessWidget {
           headPhoto!=null&&headPhoto.isNotEmpty ? CachedNetworkImage(
             imageUrl: headPhoto,
             fit: BoxFit.cover,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (ctx, url, err) => Icon(Icons.error)
           ) : Offstage(),
           Container(
             padding: EdgeInsets.only(

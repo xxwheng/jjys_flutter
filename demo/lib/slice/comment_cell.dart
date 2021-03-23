@@ -30,7 +30,7 @@ class YsCommentCell extends StatelessWidget {
               child: Container(
                 width: AdaptUI.rpx(90),
                 height: AdaptUI.rpx(90),
-                child: CachedNetworkImage(imageUrl: headIcon,),
+                child: CachedNetworkImage(imageUrl: headIcon),
               ),
             ),
           ),

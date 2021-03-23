@@ -38,7 +38,7 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
     // TODO: implement initState
     super.initState();
     key = "collectKey${widget.type.index}";
-    getLine<int>(key).onLoading();
+    getLine<bool>(key).onLoading();
     onRefresh();
   }
 
@@ -50,7 +50,7 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
       "methodName": "YuesaoCollectList",
       "page": this.page,
       "size": this.size,
-      "role": widget.type,
+      "role": widget.type.index,
     }).then((res) {
       var collectList = (res['data'] as List)
           ?.map((e) => e == null ? null : UserCollectBean.fromJson(e))
@@ -58,11 +58,11 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
       var page = int.parse(res['page'].toString());
       var total = int.parse(res['total'].toString());
       addList(collectList, page, total);
-      getLine<int>(key).setData(DateTime.now().millisecondsSinceEpoch);
+      getLine<bool>(key).setData(true, true);
     }).catchError((err) {
       this.endRefreshing(status: false);
       if (list.isEmpty) {
-        getLine<int>(key).onFailure();
+        getLine<bool>(key).onFailure();
       }
     }).whenComplete(() {});
   }
@@ -84,14 +84,14 @@ class _CollectYsTabViewState extends State<CollectYsTabView>
     }).then((value) {
       VToast.show("取消成功");
       list.remove(bean);
-      getLine<int>(key).setData(DateTime.now().millisecondsSinceEpoch);
+      getLine<bool>(key).setData(true, true);
     });
   }
 
   @override
   // ignore: must_call_super
   Widget build(BuildContext context) {
-    return getLine<int>(key).addObserver(
+    return getLine<bool>(key).addObserver(
       builder: (ctx, data, _) {
         return PageRefreshWidget(
           pageDataSource: this,

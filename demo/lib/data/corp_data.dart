@@ -16,7 +16,9 @@
 import 'dart:async';
 
 import 'package:demo/common/common.dart';
+import 'package:demo/data/key_event_bus.dart';
 import 'package:demo/model/corp_grop_bean.dart';
+import 'package:demo/utils/bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -38,6 +40,7 @@ class CorpData with ChangeNotifier {
     getCorpDataFromCache().then((value) {
       if (value.id != corpBean.id) {
         this.corpBean = value;
+        eventBus.emit(EventBusKey.corpChanged);
       }
       logger.d("程序启动-同步加盟商");
     });
@@ -83,9 +86,9 @@ class CorpData with ChangeNotifier {
   CorpCityBean _defaultCorpBean() {
     return CorpCityBean(
         "1",
+        "深圳家家母婴科技有限公司",
         "深圳",
-        "深圳",
-        "深圳",
+        "家家月嫂",
         "103212",
         "0");
   }

@@ -105,7 +105,8 @@ class _PageMineState extends State<PageMine> with WidgetsBindingObserver, Naviga
 
     switch (index) {
       case 0:
-        App.navigationTo(context, PageRoutes.myCouponPage);
+        MineNativeBridge.shared.gotoMyCoupon();
+//        App.navigationTo(context, PageRoutes.myCouponPage);
         break;
       case 1:
         App.navigationTo(context, PageRoutes.myCollect);
@@ -115,7 +116,7 @@ class _PageMineState extends State<PageMine> with WidgetsBindingObserver, Naviga
       case 3:
         break;
       case 4:
-        MineNativeBridge().gotoAbout();
+        MineNativeBridge.shared.gotoAbout();
         break;
     }
   }

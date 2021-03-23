@@ -9,6 +9,7 @@ import 'package:demo/data/web_url_bridge.dart';
 import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
+import 'package:demo/utils/v_toast.dart';
 import 'package:demo/utils/verify_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -82,11 +83,13 @@ class _LoginPageState extends State<LoginPage> {
     _msgButtonCanTap(false);
     _startTimer();
     XXNetwork.shared.post(params: {
+      "methodName": "SmsLoginUser",
       "mobile": _phoneController.text,
       "ticket": ticket,
       "randstr": randStr,
       "sign": ""
     }).then((value) {
+      VToast.show("发送成功");
       _startTimer();
     }).catchError((e) {
       _msgButtonCanTap(true);

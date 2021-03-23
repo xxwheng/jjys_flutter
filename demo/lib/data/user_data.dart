@@ -3,13 +3,16 @@
 import 'dart:convert';
 
 import 'package:demo/common/common.dart';
+import 'package:demo/data/key_event_bus.dart';
 import 'package:demo/model/user_info_bean.dart';
+import 'package:demo/native/ios/mine_bridge.dart';
+import 'package:demo/utils/bus/event_bus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserData extends ChangeNotifier {
   final String userBeanKey = "user_bean_key";
-  static bool isLogin = true;
+  static bool isLogin = false;
   UserInfoBean user;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -24,6 +27,7 @@ class UserData extends ChangeNotifier {
         this.user = value;
         UserData.isLogin = true;
         notifyListeners();
+        eventBus.emit(EventBusKey.orderListRefresh);
       }
       logger.d("程序启动—同步登录态");
     });
@@ -35,6 +39,7 @@ class UserData extends ChangeNotifier {
     this.user = user;
     UserData.isLogin = true;
     notifyListeners();
+    MineNativeBridge.shared.nativeTokenCache(user);
   }
 
   /* 更新信息 */
@@ -63,6 +68,7 @@ class UserData extends ChangeNotifier {
 
   /* 退出 移除信息 */
   void logout() {
+    MineNativeBridge.shared.clearNativeCache();
     this.removeUser();
     this.user = null;
     UserData.isLogin = false;

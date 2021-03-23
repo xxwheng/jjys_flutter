@@ -38,6 +38,7 @@ class HomeYuesaoTopWidget extends StatelessWidget {
             height: AdaptUI.rpx(260),
             child: CachedNetworkImage(
               imageUrl: imageUrl,
+                errorWidget: (ctx, url, err) => Image.asset("images/place_head.png")
             ),
           ),
           Container(

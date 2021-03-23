@@ -11,6 +11,7 @@ import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:demo/slice/article_search.dart';
 import 'package:demo/template/article/article_tabbarview.dart';
+import 'package:demo/utils/bus/data_bus.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ class PageArticle extends StatefulWidget {
 }
 
 class _PageArticleState extends State<PageArticle>
-    with PageDataSource<ArticleBean> {
+    with PageDataSource<ArticleBean>, MultiDataLine, SingleTickerProviderStateMixin {
   List<ArticleCategoryBean> categoryList;
 
   List<ArticleBean> articleList;
@@ -33,7 +34,7 @@ class _PageArticleState extends State<PageArticle>
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller = TabController(length: 0, vsync: ScrollableState());
+    getLine<bool>("article_list").onLoading();
     loadCategoryList();
   }
 
@@ -45,16 +46,17 @@ class _PageArticleState extends State<PageArticle>
           ?.map((e) => e == null ? null : ArticleCategoryBean.fromJson(e))
           ?.toList();
       _controller =
-          TabController(length: categoryList.length, vsync: ScrollableState());
-      setState(() {
+          TabController(length: categoryList.length, vsync: this);
+
+//      setState(() {
         this.categoryList = categoryList;
-      });
+//      });
+      getLine<bool>("article_list").setData(true, true);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    logger.i("文章");
     return Scaffold(
         appBar: AppBar(
           title: Consumer<CorpData>(
@@ -63,49 +65,53 @@ class _PageArticleState extends State<PageArticle>
           centerTitle: true,
           elevation: 0,
         ),
-        body: Container(
-          child: Column(
-            children: [
-              Container(
-                height: AdaptUI.rpx(100),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
-                child: TabBar(
-                  controller: _controller,
-                  isScrollable: true,
-                  indicatorColor: UIColor.mainColor,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  labelColor: UIColor.mainColor,
-                  labelStyle: TextStyle(
-                      fontSize: AdaptUI.rpx(32), fontWeight: FontWeight.bold),
-                  unselectedLabelColor: UIColor.hex333,
-                  unselectedLabelStyle: TextStyle(
-                      fontSize: AdaptUI.rpx(28), fontWeight: FontWeight.normal),
-                  tabs: categoryList?.map((e) {
+        body: getLine<bool>("article_list").addObserver(
+          builder: (ctx, data, _) {
+            return Container(
+              child: Column(
+                children: [
+                  Container(
+                    height: AdaptUI.rpx(100),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(bottom: BorderSide(color: UIColor.hexEEE))),
+                    child: TabBar(
+                      controller: _controller,
+                      isScrollable: true,
+                      indicatorColor: UIColor.mainColor,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      labelColor: UIColor.mainColor,
+                      labelStyle: TextStyle(
+                          fontSize: AdaptUI.rpx(32), fontWeight: FontWeight.bold),
+                      unselectedLabelColor: UIColor.hex333,
+                      unselectedLabelStyle: TextStyle(
+                          fontSize: AdaptUI.rpx(28), fontWeight: FontWeight.normal),
+                      tabs: categoryList?.map((e) {
                         return Text(e.title);
                       })?.toList() ??
-                      [],
-                ),
-              ),
-              ArticleSearchWidget(
-                tap: () {
-                  App.navigationTo(context, PageRoutes.searchArticle);
-                },
-              ),
-              Expanded(
-                child: TabBarView(
-                  controller: _controller,
-                  children: categoryList?.map((e) {
+                          [],
+                    ),
+                  ),
+                  ArticleSearchWidget(
+                    tap: () {
+                      App.navigationTo(context, PageRoutes.searchArticle);
+                    },
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _controller,
+                      children: categoryList?.map((e) {
                         return ArticleTabBarView(
                           categoryId: e.id,
                         );
                       })?.toList() ??
-                      [],
-                ),
-              )
-            ],
-          ),
-        ));
+                          [],
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
+        ) );
   }
 }

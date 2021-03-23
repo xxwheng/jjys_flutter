@@ -42,8 +42,6 @@ class XXNetwork {
       params["token"] = _userData.user.token;
     }
 
-    params["user_id"] = "190";
-    params["token"] = "953f227f71c189402e99d3d7af2863cd";
 
     Completer completer = Completer();
 

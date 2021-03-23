@@ -65,7 +65,7 @@ class _PageArticleSearchState extends State<PageArticleSearch> with PageDataSour
 
   /// 点击文章
   void articleDidTap(ArticleBean e) {
-    MineNativeBridge().gotoArticleWeb(e.id, e.title);
+    MineNativeBridge.shared.gotoArticleWeb(e.id, e.title);
   }
 
   @override

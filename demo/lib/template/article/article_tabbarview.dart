@@ -62,7 +62,7 @@ class _ArticleTabBarViewState extends State<ArticleTabBarView>
 
   /// 点击文章
   void articleDidTap(ArticleBean e) {
-    MineNativeBridge().gotoArticleWeb(e.id, e.title);
+    MineNativeBridge.shared.gotoArticleWeb(e.id, e.title);
   }
 
 

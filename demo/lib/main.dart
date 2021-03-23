@@ -1,12 +1,17 @@
+import 'dart:convert';
+
 import 'package:demo/common/color.dart';
+import 'package:demo/common/common.dart';
 import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/user_data.dart';
+import 'package:demo/model/user_info_bean.dart';
 import 'package:demo/page/pay/xx_wxpay.dart';
 import 'package:demo/page/root/tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 import 'package:demo/page/root/app.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xx_pay/xx_pay.dart';
 
 void main() {
@@ -14,14 +19,15 @@ void main() {
   final FluroRouter router = FluroRouter();
   PageRoutes.configFluroRoutes(router);
   App.router = router;
-  App.tabBarController = TabBarController();
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => CorpData()),
-      ChangeNotifierProvider(create: (_) => UserData()),
-    ],
-    child: MyApp(),
-  ));
+
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CorpData()),
+        ChangeNotifierProvider(create: (_) => UserData()),
+      ],
+      child: MyApp(),
+    ));
+
 }
 
 
@@ -31,6 +37,8 @@ class MyApp extends StatelessWidget {
 
     ///  universalLink不能为空
     XxPay.wxRegisterApp("wx4ac4c47ec2e975db", "https://m.jjys168.com/userclient/");
+
+    App.tabBarController = TabBarController();
 
     return MaterialApp(
       title: 'Material App',
@@ -59,9 +67,6 @@ class MyApp extends StatelessWidget {
         );
       },
       home: Scaffold(
-        // appBar: AppBar(
-        //   title: Text('Material App Bar'),
-        // ),
         body: App.tabBarController,
       ),
     );

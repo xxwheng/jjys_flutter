@@ -30,7 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.0
 
   # 路由
-  fluro: ^1.7.7
+  fluro: ^2.0.3
   # 网络
   dio: ^3.0.10
   # 模型解析
@@ -40,7 +40,7 @@ dependencies:
   # 图片缓存
   cached_network_image: ^2.3.3
   # 刷新加载
-  pull_to_refresh: 1.6.3
+  pull_to_refresh: 1.6.4
   # 日期picker
   flutter_datetime_picker: ^1.4.0
   # 日历
@@ -56,9 +56,9 @@ dependencies:
   # 日志打印
   logger: ^0.9.4
   # 数据共享
-  provider: ^4.3.2+2
+  provider: ^5.0.0
   # 缓存
-  shared_preferences: ^0.5.12+4
+  shared_preferences: ^2.0.5
   # js 交互
   webview_flutter: ^1.0.7
   webview_flutter_plus: ^0.1.1+10
@@ -69,7 +69,7 @@ dependencies:
   # 相册选择
   image_picker: ^0.6.7+14
   # 图片压缩
-  flutter_native_image: ^0.0.5
+  flutter_native_image: ^0.0.5+3
   # loading
   flutter_spinkit: ^4.1.2
   # 图片浏览

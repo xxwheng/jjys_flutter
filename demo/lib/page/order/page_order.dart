@@ -7,6 +7,7 @@ import 'package:demo/data/bean_compute.dart';
 import 'package:demo/data/corp_data.dart';
 import 'package:demo/data/key_event_bus.dart';
 import 'package:demo/data/order_data.dart';
+import 'package:demo/data/user_data.dart';
 import 'package:demo/model/order_index_bean.dart';
 import 'package:demo/network/manager/xx_network.dart';
 import 'package:demo/page/root/app.dart';
@@ -35,9 +36,10 @@ class _PageOrderState extends State<PageOrder>
   void initState() {
     // TODO: implement initState
     super.initState();
-    getLine<bool>(key).onLoading();
-    onRefresh();
-    
+    if (UserData.isLogin) {
+      getLine<bool>(key).onLoading();
+      onRefresh();
+    }
     eventBus.on(EventBusKey.orderListRefresh, (arg) {
       this.onRefresh();
     });
@@ -55,14 +57,12 @@ class _PageOrderState extends State<PageOrder>
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    logger.i(context.widget);
   }
 
   @override
   void deactivate() {
     // TODO: implement deactivate
     super.deactivate();
-    logger.i("deactivate");
   }
 
   @override

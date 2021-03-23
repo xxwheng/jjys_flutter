@@ -176,7 +176,7 @@ class _PageHomeState extends State<PageHome>
 
   /// 点击文章
   void articleDidTap(ArticleBean e) {
-    MineNativeBridge().gotoArticleWeb(e.id, e.title);
+    MineNativeBridge.shared.gotoArticleWeb(e.id, e.title);
   }
 
   // 页面
@@ -244,6 +244,7 @@ class _PageHomeState extends State<PageHome>
                       HomeLearnMoreHeaderWidget(
                         title: "月嫂之星",
                         margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                        tap: () => App.navigationTo(context, PageRoutes.ysListPage),
                       ),
                       Container(
                         height: AdaptUI.rpx(470),
@@ -253,18 +254,21 @@ class _PageHomeState extends State<PageHome>
                           itemBuilder: (context, index) {
                             HomeTopYuesaoBean item =
                                 homeData.yuesaoTopList[index];
-                            return HomeYuesaoTopWidget(
-                              margin: EdgeInsets.only(
-                                  left: index == 0 ? AdaptUI.rpx(30) : 0,
-                                  top: AdaptUI.rpx(20),
-                                  bottom: AdaptUI.rpx(40),
-                                  right: AdaptUI.rpx(20)),
-                              imageUrl: item.info_yuesao.headPhoto,
-                              name: item.info_yuesao.provinceName +
-                                  "·" +
-                                  item.info_yuesao.nickname,
-                              levelStr: YsLevel.getYuesaoLevel(
-                                  item.info_yuesao.level),
+                            return GestureDetector(
+                              onTapUp: (tap) => App.navigationTo(context, PageRoutes.ysDetailPage + '?id=${item.id}'),
+                              child: HomeYuesaoTopWidget(
+                                margin: EdgeInsets.only(
+                                    left: index == 0 ? AdaptUI.rpx(30) : 0,
+                                    top: AdaptUI.rpx(20),
+                                    bottom: AdaptUI.rpx(40),
+                                    right: AdaptUI.rpx(20)),
+                                imageUrl: item.info_yuesao.headPhoto,
+                                name: item.info_yuesao.provinceName +
+                                    "·" +
+                                    item.info_yuesao.nickname,
+                                levelStr: YsLevel.getYuesaoLevel(
+                                    item.info_yuesao.level),
+                              ),
                             );
                           },
                         ),
@@ -279,6 +283,7 @@ class _PageHomeState extends State<PageHome>
                   child: Column(
                     children: [
                       HomeLearnMoreHeaderWidget(
+                        tap: () => MineNativeBridge.shared.gotoCommentWeb(),
                         title: "美妈点评",
                         margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
                       ),
@@ -336,6 +341,7 @@ class _PageHomeState extends State<PageHome>
                       HomeLearnMoreHeaderWidget(
                         title: "孕育知识",
                         margin: EdgeInsets.only(top: AdaptUI.rpx(20)),
+                        tap: () => App.switchTabBar(context, 1),
                       ),
                       ...articleList.map((e) {
                         return GestureDetector(
